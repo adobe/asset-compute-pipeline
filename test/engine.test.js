@@ -466,5 +466,32 @@ describe("Pipeline Engine tests", function () {
         assert.ok(result.renditionErrors);
         assert.strictEqual(result.renditionErrors[0].message, "No source file accessible.");
     });
-    
+
+    it("Check original source file is passed to transformer", async function () {
+        const pipeline = new Engine();
+
+        const originalInput = {
+            type: 'image/tiff',
+            path: './test/files/red_dot_alpha0.5.png'
+        };
+        const output = {
+            type: 'image/gif'
+        };
+        class TestTransformer extends GoodTransformer {
+            async compute(input, output, transformerContext) {
+                debug('Running the TestTransformer!');
+                assert.deepStrictEqual(transformerContext.source, originalInput,
+                    "transformerContext.source if different from originalInput");
+            }
+        }
+
+        const testTransformer = new TestTransformer();
+        pipeline.registerTransformer(testTransformer);
+
+        const plan = new Plan();
+        // TODO: should happen inside transformer
+        await pipeline.refinePlan(plan, originalInput, output);
+        const result = await pipeline.run(plan);
+        assert.ok(result.renditionErrors);
+    });
 });
