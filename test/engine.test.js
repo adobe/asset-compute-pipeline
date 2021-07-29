@@ -480,8 +480,10 @@ describe("Pipeline Engine tests", function () {
         class TestTransformer extends GoodTransformer {
             async compute(input, output, transformerContext) {
                 debug('Running the TestTransformer!');
-                assert.deepStrictEqual(transformerContext.source, originalInput,
-                    "transformerContext.source if different from originalInput");
+                assert.deepStrictEqual(transformerContext.originalInput, originalInput,
+                    "transformerContext.source is different from originalInput");
+                output.path = input.path;
+                return output;
             }
         }
 
@@ -492,6 +494,6 @@ describe("Pipeline Engine tests", function () {
         // TODO: should happen inside transformer
         await pipeline.refinePlan(plan, originalInput, output);
         const result = await pipeline.run(plan);
-        assert.ok(result.renditionErrors);
+        assert.ok(!result.renditionErrors, `Unexepected error: ${result.renditionErrors}`);
     });
 });
