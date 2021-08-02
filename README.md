@@ -12,7 +12,6 @@ Components:
 - Transformer: individual software components that can do a certain transformation or operation on an asset
 - Plan: actual execution plan that might be passed around different components/services
 
-
 ## API details
 
 ### Transformers
