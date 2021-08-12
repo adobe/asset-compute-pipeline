@@ -52,6 +52,7 @@
     "file-type": "^16.5.0",
     "fs-extra": "^10.0.0",
     "graph-data-structure": "^1.15.0",
-    "image-size": "^1.0.0"
+    "image-size": "^1.0.0",
+    "probe-image-size": "^7.2.1"
   }
 }

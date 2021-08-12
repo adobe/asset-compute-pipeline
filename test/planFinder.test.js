@@ -40,14 +40,16 @@ function assertPlan(plan, string, obj) {
 
 // Simplify transformers to have input/output be numbers instead of objects
 describe("PlanFinder simplified transformer tests", function() {
-    it("Sanitizes its inputs", function() {
+    it("Sanitizes its inputs", async function() {
         const planFinder = new PlanFinder({});
-        assert.throws(()=>planFinder.findBestPlan(), SourceCorruptError, "No input or outputInstructions should throw an error");
-        assert.throws(()=>planFinder.findBestPlan({},{}), SourceCorruptError, "No input or outputInstructions types should throw an error");
-        assert.throws(()=>planFinder.findBestPlan({type:0},{}), RenditionFormatUnsupportedError, "No outputInstructions type should throw an error");
-        assert.throws(()=>planFinder.findBestPlan({},{type:0}), SourceCorruptError, "No input type should throw an error");
-        assert.throws(()=>planFinder.findBestPlan({type:0},{type:'not a mime type!'}), RenditionFormatUnsupportedError, "Mime types shouldn't have spaces");
-        assert.throws(()=>planFinder.findBestPlan({type:0},{type:0}), RenditionFormatUnsupportedError, "Types are valid but fails to create plan for other reasons");
+
+        await assert.rejects(async()=>planFinder.findBestPlan(), SourceCorruptError, "No input or outputInstructions should throw an error");
+        await assert.rejects(async()=>planFinder.findBestPlan(), SourceCorruptError, "No input or outputInstructions should throw an error");
+        await assert.rejects(async()=>planFinder.findBestPlan({},{}), SourceCorruptError, "No input or outputInstructions types should throw an error");
+        await assert.rejects(async()=>planFinder.findBestPlan({type:0},{}), RenditionFormatUnsupportedError, "No outputInstructions type should throw an error");
+        await assert.rejects(async()=>planFinder.findBestPlan({},{type:0}), SourceCorruptError, "No input type should throw an error");
+        await assert.rejects(async()=>planFinder.findBestPlan({type:0},{type:'not a mime type!'}), RenditionFormatUnsupportedError, "Mime types shouldn't have spaces");
+        await assert.rejects(async()=>planFinder.findBestPlan({type:0},{type:0}), RenditionFormatUnsupportedError, "Types are valid but fails to create plan for other reasons");
         // Simple tests of known valid mime types
         assert.ok(planFinder.isMimeType("image/gif"));
         assert.ok(planFinder.isMimeType("video/x-msvideo"));
@@ -63,7 +65,7 @@ describe("PlanFinder simplified transformer tests", function() {
 
         const planFinder = new PlanFinder(registry);
 
-        let steps = planFinder.findBestPlan({type:1},{type:2});
+        let steps = await planFinder.findBestPlan({type:1},{type:2});
         assert.deepStrictEqual(steps, [{
             name: "T1",
             attributes: { 
@@ -76,7 +78,7 @@ describe("PlanFinder simplified transformer tests", function() {
             }
         }]);
 
-        steps = planFinder.findBestPlan({type:1},{type:3});
+        steps = await planFinder.findBestPlan({type:1},{type:3});
         assert.deepStrictEqual(steps, [{
             name: "T1",
             attributes: { 
@@ -99,7 +101,7 @@ describe("PlanFinder simplified transformer tests", function() {
             }
         }]);
 
-        steps = planFinder.findBestPlan({type:1},{type:4});
+        steps = await planFinder.findBestPlan({type:1},{type:4});
         assert.deepStrictEqual(steps, [{
             name: "T1",
             attributes: { 
@@ -144,7 +146,7 @@ describe("PlanFinder simplified transformer tests", function() {
         const registry = {T1, T2, T3};
         const planFinder = new PlanFinder(registry);
 
-        const steps = planFinder.findBestPlan({type:1},{type:3});
+        const steps = await planFinder.findBestPlan({type:1},{type:3});
         assert.deepStrictEqual(steps, [{
             name: "T1",
             attributes: { 
@@ -173,9 +175,7 @@ describe("PlanFinder simplified transformer tests", function() {
         const registry = {T1, T2};
         const planFinder = new PlanFinder(registry);
 
-        assert.throws(()=> {
-            planFinder.findBestPlan({type:3},{type:2});
-        }, RenditionFormatUnsupportedError, "Should throw error when plan cannot be found");
+        await assert.rejects(async()=>planFinder.findBestPlan({type:3},{type:2}), RenditionFormatUnsupportedError, "Should throw error when plan cannot be found");
     });
     it("No plan found - no output", async function() {
         // Registered transformers would result in the following graphs:
@@ -185,9 +185,7 @@ describe("PlanFinder simplified transformer tests", function() {
         const T2 = new Transformer("T2", { inputs: {type:2}, outputs: {type:3} });
         const registry = {T1, T2};
 
-        assert.throws(()=>{
-            new PlanFinder(registry).findBestPlan({type:1}, {type:4});
-        }, RenditionFormatUnsupportedError, "Should throw error when plan cannot be found");        
+        await assert.rejects(()=>new PlanFinder(registry).findBestPlan({type:1}, {type:4}), RenditionFormatUnsupportedError, "Should throw error when plan cannot be found");        
     });
     it("No plan found - input & output possible but graphs don't connect", async function() {
         // Registered transformers would result in the following graphs:
@@ -199,9 +197,7 @@ describe("PlanFinder simplified transformer tests", function() {
         const T3 = new Transformer("T3", { inputs: {type:5}, outputs: {type:4} });
         const registry = {T1, T2, T3};
 
-        assert.throws(()=>{
-            new PlanFinder(registry).findBestPlan({type:1}, {type:4});
-        }, RenditionFormatUnsupportedError, "Should throw error when plan cannot be found");        
+        await assert.rejects(()=>new PlanFinder(registry).findBestPlan({type:1}, {type:4}), RenditionFormatUnsupportedError, "Should throw error when plan cannot be found");        
     });
     it("No plan found - input & output possible but not path (nested)", async function() {
         // Registered transformers would result in 3 separate graphs:
@@ -214,9 +210,7 @@ describe("PlanFinder simplified transformer tests", function() {
         const T3 = new Transformer("T3", { inputs: {type:1}, outputs: {type:3} });
         const T4 = new Transformer("T4", { inputs: {type:5}, outputs: {type:4} });
         const registry = {T1, T2, T3, T4};
-        assert.throws(()=>{
-            new PlanFinder(registry).findBestPlan({type:1}, {type:4});
-        }, RenditionFormatUnsupportedError, "Should throw error when plan cannot be found");        
+        await assert.rejects(()=>new PlanFinder(registry).findBestPlan({type:1}, {type:4}), RenditionFormatUnsupportedError, "Should throw error when plan cannot be found");        
     });
     it("Shorter plan chosen", async function() {
         // there are techinically two possible plans:
@@ -234,7 +228,7 @@ describe("PlanFinder simplified transformer tests", function() {
         const registry = {T1, T2, T3, T4};
         const planFinder = new PlanFinder(registry);
 
-        const steps = planFinder.findBestPlan({type:1},{type:4});
+        const steps = await planFinder.findBestPlan({type:1},{type:4});
         assert.deepStrictEqual(steps, [{
             name: "T1",
             attributes: { 
@@ -277,7 +271,7 @@ describe("PlanFinder simplified transformer tests", function() {
         const registry = {T1, T2, T3, T4, T6, T7};
         const planFinder = new PlanFinder(registry);
 
-        const steps = planFinder.findBestPlan({type:1},{type:6});
+        const steps = await planFinder.findBestPlan({type:1},{type:6});
         assert.deepStrictEqual(steps, [{
             name: "T1",
             attributes: { 
@@ -332,7 +326,7 @@ describe("PlanFinder simplified transformer tests", function() {
         const registry = {T1, T2, T3, T4, T5, T6, T7};
         const planFinder = new PlanFinder(registry);
 
-        const steps = planFinder.findBestPlan({type:1},{type:6});
+        const steps = await planFinder.findBestPlan({type:1},{type:6});
         assert.deepStrictEqual(steps, [{
             name: "T1",
             attributes: { 
@@ -376,7 +370,7 @@ describe("PlanFinder simplified transformer tests", function() {
         assert.strictEqual(Object.keys(registry).length, 100);
         const planFinder = new PlanFinder(registry);
 
-        const steps = planFinder.findBestPlan({type:0},{type:100});
+        const steps = await planFinder.findBestPlan({type:0},{type:100});
         assert.strictEqual(steps.length, 100);
         assert.deepStrictEqual(steps[50], {
             name: "T50",
@@ -400,11 +394,9 @@ describe("PlanFinder simplified transformer tests", function() {
         assert.strictEqual(Object.keys(registry).length, 302);
         const planFinder = new PlanFinder(registry);
 
-        assert.throws(()=>{
-            planFinder.findBestPlan({type:0},{type:301});
-        }, RenditionFormatUnsupportedError, "Should throw error when plan cannot be found");        
+        await assert.rejects(()=>planFinder.findBestPlan({type:0},{type:301}), RenditionFormatUnsupportedError, "Should throw error when plan cannot be found");        
         
-        const plan = planFinder.findBestPlan({type:0},{type:300});
+        const plan = await planFinder.findBestPlan({type:0},{type:300});
         assert.ok(plan);
     }).timeout(3000);
 });
@@ -444,7 +436,7 @@ describe("PlanFinder tests - using dummy transformers", function() {
             type: 'image/png'
         };
 
-        const steps = new PlanFinder(registry).findBestPlan(input, output);
+        const steps = await new PlanFinder(registry).findBestPlan(input, output);
         assert.deepStrictEqual(steps, [{
             name: "tPNG",
             attributes: { output: output, input: input }
@@ -458,7 +450,7 @@ describe("PlanFinder tests - using dummy transformers", function() {
             type: 'image/gif'
         };
 
-        const steps = new PlanFinder(registry).findBestPlan(input, output);
+        const steps = await new PlanFinder(registry).findBestPlan(input, output);
         assert.deepStrictEqual(steps, [{
             name: "tPNG",
             attributes: { 
@@ -484,7 +476,7 @@ describe("PlanFinder tests - using dummy transformers", function() {
             }
         };
 
-        const steps = new PlanFinder(registry).findBestPlan(input, output);
+        const steps = await new PlanFinder(registry).findBestPlan(input, output);
         console.log('steps', steps);
         assert.deepStrictEqual(steps, [{
             name: "tPNG",
@@ -505,7 +497,7 @@ describe("PlanFinder tests - using dummy transformers", function() {
             }
         }]);
     });
-        
+
     it("No plan found - no input", async function() {
         const input = {
             type: 'image/psd'
@@ -513,9 +505,7 @@ describe("PlanFinder tests - using dummy transformers", function() {
         const output = {
             type: 'image/png'
         };
-        assert.throws(()=>{
-            new PlanFinder(registry).findBestPlan(input, output);
-        }, RenditionFormatUnsupportedError, "Should throw error when plan cannot be found");
+        await assert.rejects(async()=>new PlanFinder(registry).findBestPlan(input, output), RenditionFormatUnsupportedError, "Should throw error when plan cannot be found");
     });
     it("No plan found - no output", async function() {
         const input = {
@@ -524,9 +514,7 @@ describe("PlanFinder tests - using dummy transformers", function() {
         const output = {
             type: 'image/psd'
         };
-        assert.throws(()=>{
-            new PlanFinder(registry).findBestPlan(input, output);
-        }, RenditionFormatUnsupportedError, "Should throw error when plan cannot be found");        
+        await assert.rejects(async()=>new PlanFinder(registry).findBestPlan(input, output), RenditionFormatUnsupportedError, "Should throw error when plan cannot be found");        
     });
     it("Multiple plans - choose first plan available", async function() {
         const tGIF2 = new Transformer("tGIF2", {
@@ -545,7 +533,7 @@ describe("PlanFinder tests - using dummy transformers", function() {
             type: 'image/gif'
         };
 
-        const steps = new PlanFinder(registry).findBestPlan(input, output);
+        const steps = await new PlanFinder(registry).findBestPlan(input, output);
         assert.deepStrictEqual(steps, [{
             name: "tPNG",
             attributes: { 
