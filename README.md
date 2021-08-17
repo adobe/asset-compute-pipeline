@@ -130,7 +130,6 @@ outputs: {
     height: { min: 0, max: 2000 }
 }
 ```
-
 ## Contributing
 Contributions are welcomed! Read the [Contributing Guide](CONTRIBUTING.md) for more information.
 
