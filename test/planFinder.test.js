@@ -197,7 +197,7 @@ describe("PlanFinder simplified transformer tests", function() {
         const T3 = new Transformer("T3", { inputs: {type:5}, outputs: {type:4} });
         const registry = {T1, T2, T3};
 
-        await assert.rejects(()=>new PlanFinder(registry).findBestPlan({type:1}, {type:4}), RenditionFormatUnsupportedError, "Should throw error when plan cannot be found");        
+        await assert.rejects(async ()=>new PlanFinder(registry).findBestPlan({type:1}, {type:4}), RenditionFormatUnsupportedError, "Should throw error when plan cannot be found");        
     });
     it("No plan found - input & output possible but not path (nested)", async function() {
         // Registered transformers would result in 3 separate graphs:
