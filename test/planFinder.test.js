@@ -956,3 +956,49 @@ describe('PlanFinder form graphs', function() {
         assert.deepStrictEqual(planFinder.graph.adjacent('T5'), ['T1']);
     });
 });
+
+describe("PlanFinder tests - for transformers", function() {
+    const callback = new Transformer("workerCallback-worker-flite", {
+        inputs: {
+            type: ['image/png']
+        },
+        outputs: {
+            type: ['image/png']
+        }
+    });
+    const senseiTransformer = new Transformer("SenseiTransformer", {
+        inputs: {
+            type: ['image/jpeg', 'image/png']
+        },
+        outputs: {
+            type: ['machine-metadata-json']
+        }
+    });
+
+    const registry = { "workerCallback-worker-flite": callback, "SenseiTransformer": senseiTransformer };
+    it("Image orientation is applied for sensei use", async function() {
+        const input = {
+            type: "image/jpeg",
+            url: "/Users/bennieboone/projects/worker-flite/action/tests/jpg-png-landscape8/file.jpg"
+        };
+        const outputFlite = {
+            type: "image/jpeg"
+        };
+        const outputSensei = {
+            type: "machine-metadata-json"
+        };
+
+        const steps = await new PlanFinder(registry).findBestPlan(input, outputSensei);
+
+        assert.deepStrictEqual(steps, [
+            {
+                name: 'workerCallback-worker-flite',
+                attributes: { input: input, output: outputFlite }
+            },
+            {
+                name: 'SenseiTransformer',
+                attributes: { input: input, output: outputSensei }
+            }
+        ]);
+    });
+});
