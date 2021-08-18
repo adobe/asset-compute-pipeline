@@ -960,15 +960,21 @@ describe('PlanFinder form graphs', function() {
 describe("PlanFinder tests - for transformers", function() {
     const callback = new Transformer("workerCallback-worker-flite", {
         inputs: {
-            type: ['image/png']
+            type: ['image/png', 'image/jpeg', 'image/gif'],
+            width: { min: 1, max: 2000000, unit: "pixel" },
+            height: { min: 1, max: 2000000, unit: "pixel" }
         },
         outputs: {
-            type: ['image/png']
+            type: ['image/png'],
+            width: { min: 1, max: 2000000, unit: "pixel" },
+            height: { min: 1, max: 2000000, unit: "pixel" }
         }
     });
     const senseiTransformer = new Transformer("SenseiTransformer", {
         inputs: {
-            type: ['image/jpeg', 'image/png']
+            type: ['image/jpeg', 'image/png'],
+            width: { min: 1, max: 500, unit: "pixel" },
+            height: { min: 1, max: 500, unit: "pixel" }
         },
         outputs: {
             type: ['machine-metadata-json']
@@ -976,10 +982,39 @@ describe("PlanFinder tests - for transformers", function() {
     });
 
     const registry = { "workerCallback-worker-flite": callback, "SenseiTransformer": senseiTransformer };
-    it("Image orientation is applied for sensei use", async function() {
+    it("Image orientation is applied for sensei use (local file)", async function() {
         const input = {
             type: "image/jpeg",
-            url: "./test/files/landscape8.jpg"
+            path: "./test/files/landscape8.jpg",
+            width: 200,
+            height: 200
+        };
+        const outputFlite = {
+            type: "image/jpeg"
+        };
+        const outputSensei = {
+            type: "machine-metadata-json"
+        };
+
+        const steps = await new PlanFinder(registry).findBestPlan(input, outputSensei);
+
+        assert.deepStrictEqual(steps, [
+            {
+                name: 'workerCallback-worker-flite',
+                attributes: { input: input, output: outputFlite }
+            }, 
+            {
+                name: 'SenseiTransformer',
+                attributes: { input: input, output: outputSensei }
+            }
+        ]);
+    });
+    it("Image orientation is applied for sensei use (source is a url)", async function() {
+        const input = {
+            type: "image/jpeg",
+            url: "https://raw.githubusercontent.com/recurser/exif-orientation-examples/master/Landscape_8.jpg",
+            width: 200,
+            height: 200
         };
         const outputFlite = {
             type: "image/jpeg"
