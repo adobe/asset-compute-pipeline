@@ -979,7 +979,7 @@ describe("PlanFinder tests - for transformers", function() {
     it("Image orientation is applied for sensei use", async function() {
         const input = {
             type: "image/jpeg",
-            url: "/Users/bennieboone/projects/worker-flite/action/tests/jpg-png-landscape8/file.jpg"
+            url: "./test/files/landscape8.jpg"
         };
         const outputFlite = {
             type: "image/jpeg"
@@ -994,7 +994,7 @@ describe("PlanFinder tests - for transformers", function() {
             {
                 name: 'workerCallback-worker-flite',
                 attributes: { input: input, output: outputFlite }
-            },
+            }, 
             {
                 name: 'SenseiTransformer',
                 attributes: { input: input, output: outputSensei }
