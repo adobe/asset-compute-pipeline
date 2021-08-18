@@ -1005,7 +1005,7 @@ describe("PlanFinder tests - for transformers", function() {
             }, 
             {
                 name: 'SenseiTransformer',
-                attributes: { input: input, output: outputSensei }
+                attributes: { input: outputFlite, output: outputSensei }
             }
         ]);
     });
@@ -1032,7 +1032,7 @@ describe("PlanFinder tests - for transformers", function() {
             }, 
             {
                 name: 'SenseiTransformer',
-                attributes: { input: input, output: outputSensei }
+                attributes: { input: outputFlite, output: outputSensei }
             }
         ]);
     });
