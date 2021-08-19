@@ -210,7 +210,7 @@ describe("PlanFinder simplified transformer tests", function() {
         const T3 = new Transformer("T3", { inputs: {type:1}, outputs: {type:3} });
         const T4 = new Transformer("T4", { inputs: {type:5}, outputs: {type:4} });
         const registry = {T1, T2, T3, T4};
-        await assert.rejects(()=>new PlanFinder(registry).findBestPlan({type:1}, {type:4}), RenditionFormatUnsupportedError, "Should throw error when plan cannot be found");        
+        await assert.rejects(async ()=>new PlanFinder(registry).findBestPlan({type:1}, {type:4}), RenditionFormatUnsupportedError, "Should throw error when plan cannot be found");        
     });
     it("Shorter plan chosen", async function() {
         // there are techinically two possible plans:
