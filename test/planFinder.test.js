@@ -394,7 +394,7 @@ describe("PlanFinder simplified transformer tests", function() {
         assert.strictEqual(Object.keys(registry).length, 302);
         const planFinder = new PlanFinder(registry);
 
-        await assert.rejects(()=>planFinder.findBestPlan({type:0},{type:301}), RenditionFormatUnsupportedError, "Should throw error when plan cannot be found");        
+        await assert.rejects(async ()=>planFinder.findBestPlan({type:0},{type:301}), RenditionFormatUnsupportedError, "Should throw error when plan cannot be found");        
         
         const plan = await planFinder.findBestPlan({type:0},{type:300});
         assert.ok(plan);
