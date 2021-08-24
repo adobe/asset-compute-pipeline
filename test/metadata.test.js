@@ -23,7 +23,7 @@ const child_process = require('child_process');
 // Note: You need exiftool installed locally to run these tests
 describe('getMetadata from local file', function() {
     const IMAGE_WITH_ORIENTATION = 'https://raw.githubusercontent.com/adobe/asset-compute-pipeline/NUI-1460/fix/test/files/landscape8.jpg';
-    const IMAGE_WITHOUT_ORIENTATION = 'https://raw.githubusercontent.com/adobe/asset-compute-pipeline/NUI-1460/fix/test/files/red_dot_alpha0.5.png';
+    const IMAGE_WITHOUT_ORIENTATION = 'https://raw.githubusercontent.com/adobe/asset-compute-pipeline/master/test/files/red_dot_alpha0.5.png';
     const LOCAL_WITH_ORIENTATION = './test/files/landscape8.jpg';
     const LOCAL_WITHOUT_ORIENTATION = './test/files/red_dot_alpha0.5.png';
     const IMAGE_DOWNLOAD_TIMEOUT = 5000;
