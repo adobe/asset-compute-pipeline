@@ -22,9 +22,9 @@ const child_process = require('child_process');
 
 // mocked tests
 describe('getMetadata from URL mocked', function() {
-    const IMAGE_WITH_ORIENTATION = 'https://raw.githubusercontent.com/adobe/asset-compute-pipeline/NUI-1460/fix/test/files/landscape8.jpg';
+    const IMAGE_WITH_ORIENTATION = 'https://raw.githubusercontent.com/adobe/asset-compute-pipeline/NUI-1460/sample/test/files/orientation_beach.png';
     const IMAGE_WITHOUT_ORIENTATION = 'https://raw.githubusercontent.com/adobe/asset-compute-pipeline/master/test/files/red_dot_alpha0.5.png';
-    const LOCAL_WITH_ORIENTATION = './test/files/landscape8.jpg';
+    const LOCAL_WITH_ORIENTATION = './test/files/orientation_beach.png';
     const LOCAL_WITHOUT_ORIENTATION = './test/files/red_dot_alpha0.5.png';
 
     it("gets metadata from a local file with orientation (mocked) metadata (jpeg) ", async function(){
@@ -35,11 +35,11 @@ describe('getMetadata from URL mocked', function() {
                 "ImageHeight": 1600,
                 "EncodingProcess": "Baseline DCT, Huffman coding",
                 "BitsPerSample": 8,
-                "Orientation": "Rotate 270 CW"
+                "Orientation": "Horizontal (normal)"
             }]);
         };
         const metadata = await getImageMetadata(LOCAL_WITH_ORIENTATION);
-        assert.strictEqual(metadata.Orientation, "Rotate 270 CW");
+        assert.strictEqual(metadata.Orientation, "Horizontal (normal)");
         child_process.execSync = child_process._original_execSync;
     });
 
@@ -66,11 +66,11 @@ describe('getMetadata from URL mocked', function() {
                 "BitsPerSample": 8,
                 "ImageSize": "2560x1600",
                 "Megapixels": 4.1,
-                "Orientation": "Rotate 270 CW"
+                "Orientation": "Horizontal (normal)"
             }]);
         };
         const metadata = await getImageMetadata(IMAGE_WITH_ORIENTATION);
-        assert.strictEqual(metadata.Orientation, "Rotate 270 CW");
+        assert.strictEqual(metadata.Orientation, "Horizontal (normal)");
         child_process.execSync = child_process._original_execSync;
     });
 
@@ -93,15 +93,15 @@ describe('getMetadata from URL mocked', function() {
 
 // tests without mocks
 describe('getMetadata from local file', function() {
-    const IMAGE_WITH_ORIENTATION = 'https://raw.githubusercontent.com/adobe/asset-compute-pipeline/NUI-1460/fix/test/files/landscape8.jpg';
+    const IMAGE_WITH_ORIENTATION = 'https://raw.githubusercontent.com/adobe/asset-compute-pipeline/NUI-1460/sample/test/files/orientation_beach.png';
     const IMAGE_WITHOUT_ORIENTATION = 'https://raw.githubusercontent.com/adobe/asset-compute-pipeline/master/test/files/red_dot_alpha0.5.png';
-    const LOCAL_WITH_ORIENTATION = './test/files/landscape8.jpg';
+    const LOCAL_WITH_ORIENTATION = './test/files/orientation_beach.png';
     const LOCAL_WITHOUT_ORIENTATION = './test/files/red_dot_alpha0.5.png';
     const IMAGE_DOWNLOAD_TIMEOUT = 5000;
 
     it("gets orientation metadata from a local file w/ orientation (jpeg) ", async function(){
         const metadata = await getImageMetadata(LOCAL_WITH_ORIENTATION);
-        assert.strictEqual(metadata.Orientation, "Rotate 270 CW");
+        assert.strictEqual(metadata.Orientation, "Horizontal (normal)");
     });
 
     it("gets metadata from a local file w/o orientation (png)", async function(){
@@ -111,7 +111,7 @@ describe('getMetadata from local file', function() {
 
     it("attempt to get metadata from Image URL with orientation (jpeg) ", async function(){
         const metadata = await getImageMetadata(IMAGE_WITH_ORIENTATION);
-        assert.strictEqual(metadata.Orientation, "Rotate 270 CW");
+        assert.strictEqual(metadata.Orientation, "Horizontal (normal)");
     }).timeout(IMAGE_DOWNLOAD_TIMEOUT);
 
     it("attempt to get metadata from Image URL  w/o  Orientation (jpeg) ", async function(){

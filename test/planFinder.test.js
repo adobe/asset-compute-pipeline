@@ -958,7 +958,7 @@ describe('PlanFinder form graphs', function() {
 });
 
 describe("PlanFinder tests - for transformers", function() {
-    const IMAGE_WITH_ORIENTATION = 'https://raw.githubusercontent.com/adobe/asset-compute-pipeline/NUI-1460/fix/test/files/landscape8.jpg';
+    const IMAGE_WITH_ORIENTATION = 'https://raw.githubusercontent.com/adobe/asset-compute-pipeline/NUI-1460/sample/test/files/orientation_beach.png';
     const IMAGE_WITHOUT_ORIENTATION = 'https://raw.githubusercontent.com/adobe/asset-compute-pipeline/master/test/files/red_dot_alpha0.5.png';
     const LOCAL_WITH_ORIENTATION = './test/files/orientation_beach.png';
     const LOCAL_WITHOUT_ORIENTATION = './test/files/red_dot_alpha0.5.png';
