@@ -958,6 +958,11 @@ describe('PlanFinder form graphs', function() {
 });
 
 describe("PlanFinder tests - for transformers", function() {
+    const IMAGE_WITH_ORIENTATION = 'https://raw.githubusercontent.com/adobe/asset-compute-pipeline/NUI-1460/fix/test/files/landscape8.jpg';
+    const IMAGE_WITHOUT_ORIENTATION = 'https://raw.githubusercontent.com/adobe/asset-compute-pipeline/master/test/files/red_dot_alpha0.5.png';
+    const LOCAL_WITH_ORIENTATION = './test/files/orientation_beach.png';
+    const LOCAL_WITHOUT_ORIENTATION = './test/files/red_dot_alpha0.5.png';
+
     const callback = new Transformer("workerCallback-worker-flite", {
         inputs: {
             type: ['image/png', 'image/jpeg', 'image/gif'],
@@ -982,10 +987,10 @@ describe("PlanFinder tests - for transformers", function() {
     });
 
     const registry = { "workerCallback-worker-flite": callback, "SenseiTransformer": senseiTransformer };
-    it("Image orientation is applied for sensei use (local file)", async function() {
+    it("Image with orientation applied for sensei use (local file)", async function() {
         const input = {
             type: "image/jpeg",
-            path: "./test/files/landscape8.jpg",
+            path: LOCAL_WITH_ORIENTATION,
             width: 200,
             height: 200
         };
@@ -1009,10 +1014,32 @@ describe("PlanFinder tests - for transformers", function() {
             }
         ]);
     });
-    it("Image orientation is applied for sensei use (source is a url)", async function() {
+
+    it("Image without orientation applied for sensei use (local file)", async function() {
         const input = {
             type: "image/jpeg",
-            url: "https://raw.githubusercontent.com/recurser/exif-orientation-examples/master/Landscape_8.jpg",
+            path: LOCAL_WITHOUT_ORIENTATION,
+            width: 200,
+            height: 200
+        };
+        const outputSensei = {
+            type: "machine-metadata-json"
+        };
+
+        const steps = await new PlanFinder(registry).findBestPlan(input, outputSensei);
+
+        assert.deepStrictEqual(steps, [
+            {
+                name: 'SenseiTransformer',
+                attributes: { input: input, output: outputSensei }
+            }
+        ]);
+    });
+
+    it("Image with orientation applied for sensei use (source is a url)", async function() {
+        const input = {
+            type: "image/jpeg",
+            url: IMAGE_WITH_ORIENTATION,
             width: 200,
             height: 200
         };
@@ -1033,6 +1060,27 @@ describe("PlanFinder tests - for transformers", function() {
             {
                 name: 'SenseiTransformer',
                 attributes: { input: outputFlite, output: outputSensei }
+            }
+        ]);
+    });
+
+    it("Image without orientation applied for sensei use (source is a url)", async function() {
+        const input = {
+            type: "image/jpeg",
+            url: IMAGE_WITHOUT_ORIENTATION,
+            width: 200,
+            height: 200
+        };
+        const outputSensei = {
+            type: "machine-metadata-json"
+        };
+
+        const steps = await new PlanFinder(registry).findBestPlan(input, outputSensei);
+
+        assert.deepStrictEqual(steps, [
+            {
+                name: 'SenseiTransformer',
+                attributes: { input: input, output: outputSensei }
             }
         ]);
     });
