@@ -21,7 +21,7 @@ const { getImageMetadata } = require('../lib/metadata');
 const child_process = require('child_process');
 
 // mocked tests
-describe('getMetadata from URL mocked', function() {
+describe('gets metadata from URL mocked', function() {
     const IMAGE_WITH_ORIENTATION = 'https://raw.githubusercontent.com/adobe/asset-compute-pipeline/NUI-1460/sample/test/files/orientation_beach.png';
     const IMAGE_WITHOUT_ORIENTATION = 'https://raw.githubusercontent.com/adobe/asset-compute-pipeline/master/test/files/red_dot_alpha0.5.png';
     const LOCAL_WITH_ORIENTATION = './test/files/orientation_beach.png';
@@ -91,31 +91,33 @@ describe('getMetadata from URL mocked', function() {
     });
 });
 
-// tests without mocks
-describe('getMetadata from local file', function() {
-    const IMAGE_WITH_ORIENTATION = 'https://raw.githubusercontent.com/adobe/asset-compute-pipeline/master/test/files/orientation_beach.png';
-    const IMAGE_WITHOUT_ORIENTATION = 'https://raw.githubusercontent.com/adobe/asset-compute-pipeline/master/test/files/red_dot_alpha0.5.png';
-    const LOCAL_WITH_ORIENTATION = './test/files/orientation_beach.png';
-    const LOCAL_WITHOUT_ORIENTATION = './test/files/red_dot_alpha0.5.png';
-    const IMAGE_DOWNLOAD_TIMEOUT = 5000;
+/* 
+* tests without mocks For local dev testing only
+*/
+// describe('getMetadata from local file', function() {
+//     const IMAGE_WITH_ORIENTATION = 'https://raw.githubusercontent.com/adobe/asset-compute-pipeline/master/test/files/orientation_beach.png';
+//     const IMAGE_WITHOUT_ORIENTATION = 'https://raw.githubusercontent.com/adobe/asset-compute-pipeline/master/test/files/red_dot_alpha0.5.png';
+//     const LOCAL_WITH_ORIENTATION = './test/files/orientation_beach.png';
+//     const LOCAL_WITHOUT_ORIENTATION = './test/files/red_dot_alpha0.5.png';
+//     const IMAGE_DOWNLOAD_TIMEOUT = 5000;
 
-    it("gets orientation metadata from a local file w/ orientation (jpeg) ", async function(){
-        const metadata = await getImageMetadata(LOCAL_WITH_ORIENTATION);
-        assert.strictEqual(metadata.Orientation, "Horizontal (normal)");
-    });
+//     it("gets orientation metadata from a local file w/ orientation (jpeg) ", async function(){
+//         const metadata = await getImageMetadata(LOCAL_WITH_ORIENTATION);
+//         assert.strictEqual(metadata.Orientation, "Horizontal (normal)");
+//     });
 
-    it("gets metadata from a local file w/o orientation (png)", async function(){
-        const metadata = await getImageMetadata(LOCAL_WITHOUT_ORIENTATION);
-        assert.strictEqual(metadata.Orientation, undefined);
-    });
+//     it("gets metadata from a local file w/o orientation (png)", async function(){
+//         const metadata = await getImageMetadata(LOCAL_WITHOUT_ORIENTATION);
+//         assert.strictEqual(metadata.Orientation, undefined);
+//     });
 
-    it("attempt to get metadata from Image URL with orientation (jpeg) ", async function(){
-        const metadata = await getImageMetadata(IMAGE_WITH_ORIENTATION);
-        assert.strictEqual(metadata.Orientation, "Horizontal (normal)");
-    }).timeout(IMAGE_DOWNLOAD_TIMEOUT);
+//     it("attempt to get metadata from Image URL with orientation (jpeg) ", async function(){
+//         const metadata = await getImageMetadata(IMAGE_WITH_ORIENTATION);
+//         assert.strictEqual(metadata.Orientation, "Horizontal (normal)");
+//     }).timeout(IMAGE_DOWNLOAD_TIMEOUT);
 
-    it("attempt to get metadata from Image URL  w/o  Orientation (jpeg) ", async function(){
-        const metadata = await getImageMetadata(IMAGE_WITHOUT_ORIENTATION);
-        assert.strictEqual(metadata.Orientation, undefined);
-    }).timeout(IMAGE_DOWNLOAD_TIMEOUT);
-});
+//     it("attempt to get metadata from Image URL  w/o  Orientation (jpeg) ", async function(){
+//         const metadata = await getImageMetadata(IMAGE_WITHOUT_ORIENTATION);
+//         assert.strictEqual(metadata.Orientation, undefined);
+//     }).timeout(IMAGE_DOWNLOAD_TIMEOUT);
+// });
