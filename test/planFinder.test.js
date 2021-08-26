@@ -851,8 +851,7 @@ describe("E2E tests with Pipeline Engine", function() {
     });
 });
 
-
-
+// test for PlanFinder graphs
 describe('PlanFinder form graphs', function() {
     it("Very simple graph", async function() {
         // Registered transformers would result in the following graphs:
@@ -1308,6 +1307,39 @@ describe("PlanFinder tests - for transformers MOCKED", function() {
         const steps = await planFinder.findBestPlan(input, outputSensei);
 
         assert.deepStrictEqual(steps, planMock);
+        child_process.execSync = child_process._original_execSync;
+    });
+
+    it("vefiy exif command is correct for orientation check via image URL (mocked)", async function(){
+        child_process._original_execSync = child_process.execSync;
+        child_process.execSync = function (cmd) {
+
+            // check commmand
+            assert.strictEqual(cmd, `curl -s "${IMAGE_WITH_ORIENTATION}" | exiftool -json - ` );
+
+            return JSON.stringify([{
+                "BitsPerSample": 8,
+                "ImageSize": "2560x1600",
+                "Orientation": "Horizontal (normal)"
+            }]);
+        };
+
+        // input
+        const input = {
+            type: "image/png",
+            url: IMAGE_WITH_ORIENTATION,
+            width: 200,
+            height: 200
+        };
+
+        const outputSensei = {
+            type: "machine-metadata-json"
+        };
+
+        // get plan finder
+        const planFinder = new PlanFinder(registry);
+        await planFinder.findBestPlan(input, outputSensei);
+
         child_process.execSync = child_process._original_execSync;
     });
 });
