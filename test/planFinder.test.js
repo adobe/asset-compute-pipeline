@@ -32,6 +32,7 @@ const Transformer = require("../lib/transformer");
 const assert = require('assert');
 const { TransformerGIF, TransformerPNG, TransformerSensei, TransformerImage } = require('./transformers/testTransformers');
 const {RenditionFormatUnsupportedError, SourceCorruptError} = require('@adobe/asset-compute-commons');
+const child_process = require('child_process');
 
 function assertPlan(plan, string, obj) {
     assert.strictEqual(plan.toString(), string);
@@ -957,8 +958,9 @@ describe('PlanFinder form graphs', function() {
     });
 });
 
+// non mocked
 describe("PlanFinder tests - for transformers", function() {
-    const IMAGE_WITH_ORIENTATION = 'https://raw.githubusercontent.com/adobe/asset-compute-pipeline/NUI-1460/sample/test/files/orientation_beach.png';
+    const IMAGE_WITH_ORIENTATION = 'https://raw.githubusercontent.com/adobe/asset-compute-pipeline/master/test/files/orientation_beach.png';
     const IMAGE_WITHOUT_ORIENTATION = 'https://raw.githubusercontent.com/adobe/asset-compute-pipeline/master/test/files/red_dot_alpha0.5.png';
     const LOCAL_WITH_ORIENTATION = './test/files/orientation_beach.png';
     const LOCAL_WITHOUT_ORIENTATION = './test/files/red_dot_alpha0.5.png';
@@ -1083,5 +1085,229 @@ describe("PlanFinder tests - for transformers", function() {
                 attributes: { input: input, output: outputSensei }
             }
         ]);
+    });
+});
+
+// Plan finder orientation test for sending to Sensei (mocked)
+describe("PlanFinder tests - for transformers MOCKED", function() {
+    const IMAGE_WITH_ORIENTATION = 'https://raw.githubusercontent.com/adobe/asset-compute-pipeline/master/test/files/orientation_beach.png';
+    const IMAGE_WITHOUT_ORIENTATION = 'https://raw.githubusercontent.com/adobe/asset-compute-pipeline/master/test/files/red_dot_alpha0.5.png';
+    const LOCAL_WITH_ORIENTATION = './test/files/orientation_beach.png';
+    const LOCAL_WITHOUT_ORIENTATION = './test/files/red_dot_alpha0.5.png';
+    // url
+    const callback = new Transformer("workerCallback-worker-flite", {
+        inputs: {
+            type: ['image/png', 'image/jpeg', 'image/gif'],
+            width: { min: 1, max: 2000000, unit: "pixel" },
+            height: { min: 1, max: 2000000, unit: "pixel" }
+        },
+        outputs: {
+            type: ['image/png']
+        }
+    });
+    const senseiTransformer = new Transformer("SenseiTransformer", {
+        inputs: {
+            type: ['image/jpeg', 'image/png'],
+            width: { min: 1, max: 500, unit: "pixel" },
+            height: { min: 1, max: 500, unit: "pixel" }
+        },
+        outputs: {
+            type: ['machine-metadata-json']
+        }
+    });
+
+    const registry = { "workerCallback-worker-flite": callback, "SenseiTransformer": senseiTransformer };
+
+    it("get correct plan for image with orientation from Image URL with (mocked)", async function(){
+        child_process._original_execSync = child_process.execSync;
+        child_process.execSync = function () {
+            console.log('!Mocked execSync');
+            return JSON.stringify([{
+                "ImageHeight": 1600,
+                "BitsPerSample": 8,
+                "ImageSize": "2560x1600",
+                "Orientation": "Horizontal (normal)"
+            }]);
+        };
+
+        // input
+        const input = {
+            type: "image/png",
+            url: IMAGE_WITH_ORIENTATION,
+            width: 200,
+            height: 200
+        };
+
+        const outputSensei = {
+            type: "machine-metadata-json"
+        };
+
+        const planFinder = new PlanFinder(registry);
+        const steps = await planFinder.findBestPlan(input, outputSensei);
+
+        const planMock = [
+            {
+                "name": "workerCallback-worker-flite",
+                "attributes": {
+                    "input": input,
+                    "output": {
+                        "type": "image/png"
+                    }
+                }
+            },
+            {
+                "name": "SenseiTransformer",
+                "attributes": {
+                    "input": {
+                        "type": "image/png"
+                    },
+                    "output": {
+                        "type": "machine-metadata-json"
+                    }
+                }
+            }
+        ];
+
+        assert.deepStrictEqual(steps, planMock);
+        child_process.execSync = child_process._original_execSync;
+    });
+
+    it("get correct plan for image without orientation from Image URL (mocked)", async function(){
+        child_process._original_execSync = child_process.execSync;
+        child_process.execSync = function () {
+            console.log('Mocked execSync');
+            return JSON.stringify([{
+                "ImageHeight": 1600,
+                "BitsPerSample": 8,
+                "ImageSize": "2560x1600"
+            }]);
+        };
+
+        // input
+        const input = {
+            type: "image/png",
+            url: IMAGE_WITHOUT_ORIENTATION,
+            width: 200,
+            height: 200
+        };
+
+        const outputSensei = {
+            type: "machine-metadata-json"
+        };
+        const planMock = [
+            {
+                "name": "SenseiTransformer",
+                "attributes": {
+                    "input": input,
+                    "output": outputSensei
+                }
+            }
+        ];
+
+        // get plan finder
+        const planFinder = new PlanFinder(registry);
+        const steps = await planFinder.findBestPlan(input, outputSensei);
+
+        assert.deepStrictEqual(steps, planMock);
+        child_process.execSync = child_process._original_execSync;
+    });
+
+    it("get correct plan for image with orientation from local file (mocked)", async function(){
+        child_process._original_execSync = child_process.execSync;
+        child_process.execSync = function () {
+            console.log('Mocked execSync');
+            return JSON.stringify([{
+                "ImageHeight": 1600,
+                "BitsPerSample": 8,
+                "ImageSize": "2560x1600",
+                "Orientation": "Horizontal (normal)"
+            }]);
+        };
+
+        // input
+        const input = {
+            type: "image/png",
+            path: LOCAL_WITH_ORIENTATION,
+            width: 200,
+            height: 200
+        };
+
+        const outputSensei = {
+            type: "machine-metadata-json"
+        };
+
+        const planMock = [
+            {
+                "name": "workerCallback-worker-flite",
+                "attributes": {
+                    "input": input,
+                    "output": {
+                        "type": "image/png"
+                    }
+                }
+            },
+            {
+                "name": "SenseiTransformer",
+                "attributes": {
+                    "input": {
+                        "type": "image/png"
+                    },
+                    "output": {
+                        "type": "machine-metadata-json"
+                    }
+                }
+            }
+        ];
+
+        const planFinder = new PlanFinder(registry);
+        const steps = await planFinder.findBestPlan(input, outputSensei);
+
+        assert.deepStrictEqual(steps, planMock);
+        child_process.execSync = child_process._original_execSync;
+    });
+
+    it("get correct plan for image without orientation from local file (mocked)", async function(){
+        child_process._original_execSync = child_process.execSync;
+        child_process.execSync = function () {
+            console.log('Mocked execSync');
+            return JSON.stringify([{
+                "ImageHeight": 1600,
+                "BitsPerSample": 8,
+                "ImageSize": "2560x1600"
+            }]);
+        };
+
+        // input
+        const input = {
+            type: "image/png",
+            path: LOCAL_WITHOUT_ORIENTATION,
+            width: 200,
+            height: 200
+        };
+
+        const outputSensei = {
+            type: "machine-metadata-json"
+        };
+
+        const planMock = [
+            {
+                "name": "SenseiTransformer",
+                "attributes": {
+                    "input": {
+                        type: "image/png",
+                        path: LOCAL_WITH_ORIENTATION,
+                        width: 200,
+                        height: 200
+                    },
+                    "output": outputSensei
+                }
+            }
+        ];
+
+        const planFinder = new PlanFinder(registry);
+        const steps = await planFinder.findBestPlan(input, outputSensei);
+
+        assert.deepStrictEqual(steps, planMock);
+        child_process.execSync = child_process._original_execSync;
     });
 });
