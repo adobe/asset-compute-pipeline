@@ -1295,7 +1295,7 @@ describe("PlanFinder tests - for transformers MOCKED", function() {
                 "attributes": {
                     "input": {
                         type: "image/png",
-                        path: LOCAL_WITH_ORIENTATION,
+                        path: LOCAL_WITHOUT_ORIENTATION,
                         width: 200,
                         height: 200
                     },
