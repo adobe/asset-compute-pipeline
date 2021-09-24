@@ -21,7 +21,7 @@
     "workflow"
   ],
   "scripts": {
-    "test": "nyc -r=text -r=lcov mocha",
+    "test": "nyc -r=text -r=lcov mocha --recursive",
     "posttest": "eslint ./ && license-checker --summary && ./node_modules/lockfile-lint/bin/lockfile-lint.js --path package-lock.json —type npm --allowed-hosts npm --allowed-schemes \"https:\" \"file:\" --empty-hostname true",
     "beautify": "eslint ./ --fix",
     "semantic-release": "semantic-release"
@@ -36,6 +36,7 @@
     "lockfile-lint": "^4.3.7",
     "mocha": "^8.2.0",
     "mock-fs": "^5.0.0",
+    "mock-require": "^3.0.3",
     "nock": "^13.0.11",
     "nyc": "^15.1.0",
     "semantic-release": "^17.4.4",
