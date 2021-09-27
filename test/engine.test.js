@@ -200,6 +200,46 @@ describe("Pipeline Engine tests", function () {
         assert.ok(transformerRan);
     });
 
+    it.only("Runs a pipeline with one transformer with a manifest", async function () {
+        this.timeout(10000); 
+        const pipeline = new Engine();
+
+        let transformerRan = false;
+        const manifest = new Manifest({
+            inputs: {
+                type: ['image/png']
+            },
+            outputs: {
+                type: ['image/jpeg']
+            }
+        });
+        class TestTransformer extends Transformer {
+            async compute() {
+                debug('Running the TestTransformer!');
+                transformerRan = true;
+            }
+            async prepare() {
+                debug("Preparing transformer!");
+            }
+        }
+        pipeline.registerTransformer(new TestTransformer('test', manifest));
+
+        const plan = new Plan();
+        plan.add("test", {
+            input: {
+                type: 'image/png',
+                path: './test/files/red_dot_alpha0.5.png',
+                sourceType: 'URL'
+            },
+            output: {
+                type: "image/png"
+            }
+        });
+
+        await pipeline.run(plan);
+        assert.ok(transformerRan);
+    });
+
     it("Runs a pipeline with two transformers", async function () {
         const pipeline = new Engine();
 
