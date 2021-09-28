@@ -500,7 +500,7 @@ describe("Pipeline Engine tests", function () {
         assert.ok(!result.renditionErrors, `Unexepected error: ${result.renditionErrors}`);
     });
 
-    it("Should generate a preSignUrl when sourceType is 'URL' with input datauri", async function () {
+    it("Should generate a presigned url when sourceType is 'URL' with input datauri", async function () {
         mockRequire('../lib/temporary-cloud-storage', {TemporaryCloudStorage});
         mockRequire.reRequire('../lib/sdk/storage/datauri');
         mockRequire.reRequire('../lib/sdk/storage');
