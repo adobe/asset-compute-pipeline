@@ -532,7 +532,7 @@ describe("Pipeline Engine tests", function () {
 
         await pipeline.run(plan);
         assert.ok(transformerRan);
-        assert.match(preparedInputAsset.url, /preSignUrl/);
+        assert.ok(preparedInputAsset.url.includes('preSignUrl'));
     });
 
     it("Should generate a preSignUrl when sourceType is 'URL' without input url", async function () {
