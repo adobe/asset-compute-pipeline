@@ -576,7 +576,6 @@ describe("Pipeline Engine tests", function () {
         mockRequire.reRequire('../lib/sdk/storage.js');
         const Engine = mockRequire.reRequire('../lib/engine');
         const pipeline = new Engine();
-
         pipeline.registerTransformer(new Transformer('test'));
 
         const plan = new Plan();
