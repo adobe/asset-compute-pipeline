@@ -43,18 +43,11 @@ class TemporaryCloudStorage {
         if(!this.aioLibFiles){
             await this._init();
         }
-        console.log(`Mock presignedUrl create  attempt ${attempt}, 
+        console.log(`Mock presignedUrl create attempt ${attempt}, 
         locationFilePath ${this.localFilePath}, permissions ${permissions}, expiry ${expiryInSeconds}` );
-        if(this.localFilePath==='fakeSuccessFilePath'){
-            this.preSignUrl += this.localFilePath;
-            return this.preSignUrl;
-        }
-        if(attempt === 3 && this.localFilePath==='fakeRetrySuccessFilePath'){
-            this.preSignUrl += this.localFilePath;
-            return this.preSignUrl;
-        }
         
-        throw Error(`Mock PresignUrl generation error ${this.localFilePath}`);
+        this.preSignUrl += this.localFilePath;
+        return this.preSignUrl;
     }
 
     /**

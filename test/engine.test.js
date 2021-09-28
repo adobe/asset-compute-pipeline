@@ -25,7 +25,9 @@ const debugConfig = require('debug');
 debugConfig.enable("pipeline:*,test:*");
 const debug = require('debug')('test:engine');
 const nock = require('nock');
+const mockRequire = require("mock-require");
 
+const { TemporaryCloudStorage } = require('./sdk/mock-test-cloud-storage');
 const Engine = require("../lib/engine");
 const { Plan } = require("../lib/plan");
 const Transformer = require("../lib/transformer");
@@ -142,6 +144,7 @@ describe("Pipeline Engine tests", function () {
     });
     afterEach(() => {
         nock.cleanAll();
+        mockRequire.stopAll();
     });
 
     it("Runs a simple pipeline", function () {
@@ -195,46 +198,6 @@ describe("Pipeline Engine tests", function () {
 
         const plan = new Plan();
         plan.add("test", DEFAULT_ATTRIBUTES);
-
-        await pipeline.run(plan);
-        assert.ok(transformerRan);
-    });
-
-    it.only("Runs a pipeline with one transformer with a manifest", async function () {
-        this.timeout(10000); 
-        const pipeline = new Engine();
-
-        let transformerRan = false;
-        const manifest = new Manifest({
-            inputs: {
-                type: ['image/png']
-            },
-            outputs: {
-                type: ['image/jpeg']
-            }
-        });
-        class TestTransformer extends Transformer {
-            async compute() {
-                debug('Running the TestTransformer!');
-                transformerRan = true;
-            }
-            async prepare() {
-                debug("Preparing transformer!");
-            }
-        }
-        pipeline.registerTransformer(new TestTransformer('test', manifest));
-
-        const plan = new Plan();
-        plan.add("test", {
-            input: {
-                type: 'image/png',
-                path: './test/files/red_dot_alpha0.5.png',
-                sourceType: 'URL'
-            },
-            output: {
-                type: "image/png"
-            }
-        });
 
         await pipeline.run(plan);
         assert.ok(transformerRan);
@@ -535,5 +498,143 @@ describe("Pipeline Engine tests", function () {
         await pipeline.refinePlan(plan, originalInput, output);
         const result = await pipeline.run(plan);
         assert.ok(!result.renditionErrors, `Unexepected error: ${result.renditionErrors}`);
+    });
+
+    it("Should generate a preSignUrl when sourceType is 'URL' with input datauri", async function () {
+        mockRequire('../lib/temporary-cloud-storage', {TemporaryCloudStorage});
+        mockRequire.reRequire('../lib/sdk/storage/datauri');
+        mockRequire.reRequire('../lib/sdk/storage');
+        const Engine = mockRequire.reRequire('../lib/engine');
+
+        const pipeline = new Engine();
+        let transformerRan = false;
+        let preparedInputAsset;
+        class TestTransformer extends Transformer {
+            async compute(input) {
+                debug('Running the TestTransformer!');
+                transformerRan = true;
+                preparedInputAsset = input;
+            }
+        }
+        pipeline.registerTransformer(new TestTransformer('test'));
+
+        const plan = new Plan();
+        plan.add("test", {
+            input: {
+                type: 'image/png',
+                url: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVQYV2NgYAAAAAMAAWgmWQ0AAAAASUVORK5CYII=',
+                sourceType: 'URL'
+            },
+            output: {
+                type: "image/jpeg"
+            }
+        });
+
+        await pipeline.run(plan);
+        assert.ok(transformerRan);
+        assert.match(preparedInputAsset.url, /preSignUrl/);
+    });
+
+    it("Should generate a preSignUrl when sourceType is 'URL' without input url", async function () {
+        mockRequire('../lib/temporary-cloud-storage', {TemporaryCloudStorage});
+        const Engine = mockRequire.reRequire('../lib/engine');
+        const pipeline = new Engine();
+
+        let transformerRan = false;
+        let preparedInputAsset;
+        class TestTransformer extends Transformer {
+            async compute(input) {
+                debug('Running the TestTransformer!');
+                transformerRan = true;
+                preparedInputAsset = input;
+            }
+        }
+        pipeline.registerTransformer(new TestTransformer('test'));
+
+        const plan = new Plan();
+        plan.add("test", {
+            input: {
+                type: 'image/png',
+                path: 'fakeSuccessFilePath',
+                sourceType: 'URL'
+            },
+            output: {
+                type: "image/png"
+            }
+        });
+
+        await pipeline.run(plan);
+        assert.ok(transformerRan);
+        assert.deepStrictEqual(preparedInputAsset.url, 'http://storage.com/preSignUrl/fakeSuccessFilePath');
+    });
+
+    it("Should download when sourceType is 'LOCAL' with input datauri", async function () {
+        let downloadRan = false;
+        let transformerRan = false;
+        mockRequire('../lib/sdk/storage/datauri', {
+            download() { downloadRan = true; }
+        });
+        mockRequire.reRequire('../lib/sdk/storage.js');
+        const Engine = mockRequire.reRequire('../lib/engine');
+        const pipeline = new Engine();
+
+        class TestTransformer extends Transformer {
+            async compute() {
+                debug('Running the TestTransformer!');
+                transformerRan = true;
+            }
+        }
+        pipeline.registerTransformer(new TestTransformer('test'));
+
+        const plan = new Plan();
+        plan.add("test", {
+            input: {
+                type: 'image/png',
+                url: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVQYV2NgYAAAAAMAAWgmWQ0AAAAASUVORK5CYII=',
+                sourceType: 'LOCAL'
+            },
+            output: {
+                type: "image/png"
+            }
+        });
+
+        await pipeline.run(plan);
+        assert.ok(transformerRan);
+        assert.ok(downloadRan);
+    });
+
+    it("Should download when sourceType is 'LOCAL' with input url", async function () {
+        let downloadRan = false;
+        let transformerRan = false;
+        mockRequire('../lib/sdk/storage/http', {
+            download() { downloadRan = true; }
+        });
+        mockRequire.reRequire('../lib/sdk/storage.js');
+        const Engine = mockRequire.reRequire('../lib/engine');
+        const pipeline = new Engine();
+
+        class TestTransformer extends Transformer {
+            async compute() {
+                debug('Running the TestTransformer!');
+                transformerRan = true;
+            }
+        }
+        pipeline.registerTransformer(new TestTransformer('test'));
+
+        const plan = new Plan();
+        plan.add("test", {
+            input: {
+                type: 'image/png',
+                url: 'https://example.com/fakeEarth.jpg',
+                sourceType: 'LOCAL'
+            },
+            output: {
+                type: "image/png"
+            }
+        });
+
+        await pipeline.run(plan);
+        assert.ok(transformerRan);
+        assert.ok(downloadRan);
     });
 });
