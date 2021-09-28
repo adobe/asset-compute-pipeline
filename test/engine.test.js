@@ -570,7 +570,6 @@ describe("Pipeline Engine tests", function () {
 
     it("Should download when sourceType is 'LOCAL' with input datauri", async function () {
         let downloadRan = false;
-        let transformerRan = false;
         mockRequire('../lib/sdk/storage/datauri', {
             download() { downloadRan = true; }
         });
@@ -578,13 +577,7 @@ describe("Pipeline Engine tests", function () {
         const Engine = mockRequire.reRequire('../lib/engine');
         const pipeline = new Engine();
 
-        class TestTransformer extends Transformer {
-            async compute() {
-                debug('Running the TestTransformer!');
-                transformerRan = true;
-            }
-        }
-        pipeline.registerTransformer(new TestTransformer('test'));
+        pipeline.registerTransformer(new Transformer('test'));
 
         const plan = new Plan();
         plan.add("test", {
@@ -599,7 +592,6 @@ describe("Pipeline Engine tests", function () {
         });
 
         await pipeline.run(plan);
-        assert.ok(transformerRan);
         assert.ok(downloadRan);
     });
 
