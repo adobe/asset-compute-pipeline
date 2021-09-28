@@ -535,7 +535,7 @@ describe("Pipeline Engine tests", function () {
         assert.ok(preparedInputAsset.url.includes('preSignUrl'));
     });
 
-    it("Should generate a preSignUrl when sourceType is 'URL' without input url", async function () {
+    it("Should generate a presigned url when sourceType is 'URL' without input url", async function () {
         mockRequire('../lib/temporary-cloud-storage', {TemporaryCloudStorage});
         const Engine = mockRequire.reRequire('../lib/engine');
         const pipeline = new Engine();
