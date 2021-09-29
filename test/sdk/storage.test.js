@@ -162,9 +162,9 @@ describe('storage.js', () => {
             assert.strictEqual(source.params.url, 'https://example.com/preSignedUrl');
         });
 
-        it('should not generate presignurl when source url is http  when disabled download is true', async () => {
+        it('should not generate presignurl when source url is http when disabled download is true', async () => {
             const assetReference = {
-                url: 'http://nondatauriurl.com/example.png'
+                url: 'https://nondatauriurl.com/example.png'
             };
             
             mockFs.restore();
@@ -186,7 +186,7 @@ describe('storage.js', () => {
             const source = await getAsset(assetReference, directory, name, disableSourceDownload);
             assert.strictEqual(source.name, 'source');
             assert.strictEqual(source.path, 'in/fakeSource/filePath/source');
-            assert.strictEqual(source.params.url, 'http://nondatauriurl.com/example.png');
+            assert.strictEqual(source.params.url, 'https://nondatauriurl.com/example.png');
         });
 
         it("should fail to generate preSignUrl for  empty data uri", async() =>{

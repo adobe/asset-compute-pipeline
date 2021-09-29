@@ -630,4 +630,121 @@ describe("Pipeline Engine tests", function () {
         assert.ok(transformerRan);
         assert.ok(downloadRan);
     });
+
+    it("Should error when neither input url nor path are provided", async function () {
+        const pipeline = new Engine();
+        pipeline.registerTransformer(new Transformer('test'));
+
+        const plan = new Plan();
+        plan.add("test", {
+            input: {
+                type: 'image/png',
+                sourceType: 'LOCAL'
+            },
+            output: {
+                type: "image/png"
+            }
+        });
+
+        const result = await pipeline.run(plan);
+        assert.ok(result.renditionErrors);
+        assert.strictEqual(result.renditionErrors[0].message,  "No source file accessible.");
+    });
+
+    it("Should default to LOCAL when no sourceType provided", async function () {
+        let downloadRan = false;
+        let transformerRan = false;
+        mockRequire('../lib/sdk/storage/http', {
+            download() { downloadRan = true; }
+        });
+        mockRequire.reRequire('../lib/sdk/storage.js');
+        const Engine = mockRequire.reRequire('../lib/engine');
+        const pipeline = new Engine();
+
+        class TestTransformer extends Transformer {
+            async compute() {
+                debug('Running the TestTransformer!');
+                transformerRan = true;
+            }
+        }
+        pipeline.registerTransformer(new TestTransformer('test'));
+
+        const plan = new Plan();
+        plan.add("test", {
+            input: {
+                type: 'image/png',
+                url: 'https://example.com/fakeEarth.jpg'
+            },
+            output: {
+                type: "image/png"
+            }
+        });
+
+        await pipeline.run(plan);
+        assert.ok(transformerRan);
+        assert.ok(downloadRan);
+    });
+
+    it("Should error when invalid path is provided", async function () {
+        const pipeline = new Engine();
+        pipeline.registerTransformer(new Transformer('test'));
+
+        const plan = new Plan();
+        plan.add("test", {
+            input: {
+                type: 'image/png',
+                path: 'this is a bad path',
+                sourceType: 'URL'
+            },
+            output: {
+                type: "image/png"
+            }
+        });
+
+        const result = await pipeline.run(plan);
+        assert.ok(result.renditionErrors);
+        assert.strictEqual(result.renditionErrors[0].message,  "Fail generating presigned url.");
+    });
+
+    it("Should error when invalid url is provided", async function () {
+        const pipeline = new Engine();
+        pipeline.registerTransformer(new Transformer('test'));
+
+        const plan = new Plan();
+        plan.add("test", {
+            input: {
+                type: 'image/png',
+                url: 'https://notvalid<',
+                sourceType: 'URL'
+            },
+            output: {
+                type: "image/png"
+            }
+        });
+
+        const result = await pipeline.run(plan);
+        assert.ok(result.renditionErrors);
+        assert.strictEqual(result.renditionErrors[0].message,  "https://notvalid< is not a valid https url");
+    });
+
+    it("Should error when invalid datauri is provided", async function () {
+        const pipeline = new Engine();
+        pipeline.registerTransformer(new Transformer('test'));
+
+        const plan = new Plan();
+        plan.add("test", {
+            input: {
+                type: 'image/png',
+                url: 'data:image/a/c;base64,xxx',
+                sourceType: 'URL'
+            },
+            output: {
+                type: "image/png"
+            }
+        });
+
+        const result = await pipeline.run(plan);
+        assert.ok(result.renditionErrors);
+        assert.strictEqual(result.renditionErrors[0].message,  "data:image/a/c;base64,xxx is not a valid data url");
+    });
 });
