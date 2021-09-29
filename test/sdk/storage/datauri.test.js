@@ -77,7 +77,7 @@ describe('datauri.js', () => {
         mockFs.restore();
         mockRequire('../../../lib/temporary-cloud-storage', {TemporaryCloudStorage});
         const datauri = mockRequire.reRequire('../../../lib/sdk/storage/datauri');
-        const preSignedUrl = await datauri.getPreSignedUrl(source.path, 0);
+        const preSignedUrl = await datauri.getPreSignedUrl(source.path);
         assert.strictEqual(preSignedUrl,`http://storage.com/preSignUrl/${source.path}`);
     });
 

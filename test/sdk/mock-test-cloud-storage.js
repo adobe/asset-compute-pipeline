@@ -39,11 +39,11 @@ class TemporaryCloudStorage {
      * @param {Number} expiryInSeconds how long the generated presigned url will be valid
      * @returns {String} a presigned url
      */
-    async generatePresignURL(cloudPath, attempt, permissions = "rwd", expiryInSeconds=3600){
+    async generatePresignURL(cloudPath, permissions = "rwd", expiryInSeconds=3600){
         if(!this.aioLibFiles){
             await this._init();
         }
-        console.log(`Mock presignedUrl create attempt ${attempt}, 
+        console.log(`Mock presignedUrl, 
         locationFilePath ${this.localFilePath}, permissions ${permissions}, expiry ${expiryInSeconds}` );
         
         this.preSignUrl += this.localFilePath;
