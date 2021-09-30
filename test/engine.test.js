@@ -724,7 +724,7 @@ describe("Pipeline Engine tests", function () {
 
         const result = await pipeline.run(plan);
         assert.ok(result.renditionErrors);
-        assert.strictEqual(result.renditionErrors[0].message,  "https://notvalid< is not a valid https url");
+        assert.strictEqual(result.renditionErrors[0].message,  "https://notvalid< must be a valid https url or datauri");
     });
 
     it("Should error when invalid datauri is provided", async function () {
@@ -745,6 +745,6 @@ describe("Pipeline Engine tests", function () {
 
         const result = await pipeline.run(plan);
         assert.ok(result.renditionErrors);
-        assert.strictEqual(result.renditionErrors[0].message,  "data:image/a/c;base64,xxx is not a valid data url");
+        assert.strictEqual(result.renditionErrors[0].message,  "data:image/a/c;base64,xxx must be a valid https url or datauri");
     });
 });
