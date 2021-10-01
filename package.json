@@ -2,7 +2,7 @@
   "name": "@adobe/asset-compute-pipeline",
   "description": "Asset Compute Pipeline Library",
   "license": "Apache-2.0",
-  "version": "2.0.1",
+  "version": "3.0.0",
   "author": {
     "name": "Adobe Inc."
   },
@@ -21,7 +21,7 @@
     "workflow"
   ],
   "scripts": {
-    "test": "nyc -r=text -r=lcov mocha",
+    "test": "nyc -r=text -r=lcov mocha --recursive",
     "posttest": "eslint ./ && license-checker --summary && ./node_modules/lockfile-lint/bin/lockfile-lint.js --path package-lock.json —type npm --allowed-hosts npm --allowed-schemes \"https:\" \"file:\" --empty-hostname true",
     "beautify": "eslint ./ --fix",
     "semantic-release": "semantic-release"
@@ -52,6 +52,7 @@
     "file-type": "^16.5.3",
     "fs-extra": "^10.0.0",
     "graph-data-structure": "^1.15.0",
-    "image-size": "^1.0.0"
+    "image-size": "^1.0.0",
+    "valid-data-url": "^4.0.0"
   }
 }
