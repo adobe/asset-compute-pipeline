@@ -27,7 +27,7 @@ const debug = require('debug')('test:engine');
 const nock = require('nock');
 const mockRequire = require("mock-require");
 
-const { TemporaryCloudStorage } = require('./sdk/mock-test-cloud-storage');
+const { TemporaryCloudStorage } = require('./sdk/mock-temporary-cloud-storage');
 const Engine = require("../lib/engine");
 const { Plan } = require("../lib/plan");
 const Transformer = require("../lib/transformer");
@@ -686,6 +686,10 @@ describe("Pipeline Engine tests", function () {
     });
 
     it("Should error when invalid path is provided", async function () {
+        mockRequire('../lib/temporary-cloud-storage', {TemporaryCloudStorage});
+        mockRequire.reRequire('../lib/sdk/storage/datauri');
+        mockRequire.reRequire('../lib/sdk/storage');
+        const Engine = mockRequire.reRequire('../lib/engine');
         const pipeline = new Engine();
         pipeline.registerTransformer(new Transformer('test'));
 
@@ -693,7 +697,7 @@ describe("Pipeline Engine tests", function () {
         plan.add("test", {
             input: {
                 type: 'image/png',
-                path: 'this is a bad path',
+                path: 'fakeInvalidFilePath',
                 sourceType: 'URL'
             },
             output: {

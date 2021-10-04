@@ -19,7 +19,7 @@ const assert = require('assert');
 const mockFs = require("mock-fs");
 const fs = require('fs-extra');
 const { download } = require('../../../lib/sdk/storage/datauri');
-const { TemporaryCloudStorage } = require('../mock-test-cloud-storage');
+const { TemporaryCloudStorage } = require('../mock-temporary-cloud-storage');
 const mockRequire = require("mock-require");
 const nock = require('nock');
 
