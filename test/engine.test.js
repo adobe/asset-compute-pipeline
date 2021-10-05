@@ -575,7 +575,7 @@ describe("Pipeline Engine tests", function () {
         mockRequire('../lib/sdk/storage/datauri', {
             download() { downloadRan = true; }
         });
-        mockRequire.reRequire('../lib/sdk/storage.js');
+        mockRequire.reRequire('../lib/sdk/storage');
         const Engine = mockRequire.reRequire('../lib/engine');
         const pipeline = new Engine();
         pipeline.registerTransformer(new Transformer('test'));
@@ -602,7 +602,7 @@ describe("Pipeline Engine tests", function () {
         mockRequire('../lib/sdk/storage/http', {
             download() { downloadRan = true; }
         });
-        mockRequire.reRequire('../lib/sdk/storage.js');
+        mockRequire.reRequire('../lib/sdk/storage');
         const Engine = mockRequire.reRequire('../lib/engine');
         const pipeline = new Engine();
 
@@ -657,7 +657,7 @@ describe("Pipeline Engine tests", function () {
         mockRequire('../lib/sdk/storage/http', {
             download() { downloadRan = true; }
         });
-        mockRequire.reRequire('../lib/sdk/storage.js');
+        mockRequire.reRequire('../lib/sdk/storage');
         const Engine = mockRequire.reRequire('../lib/engine');
         const pipeline = new Engine();
 
