@@ -57,6 +57,7 @@ describe('prepare.js', () => {
         // cleanup
         await fse.remove(baseDir);
     });
+
     it('creates needed directories with folder prefix', async () => {
         const result = await createDirectories('myfolder');
 
@@ -71,6 +72,7 @@ describe('prepare.js', () => {
         // cleanup
         await fse.remove(baseDir);
     });
+
     it('creates needed directories, from base directory', async () => {
         let result = createBaseDirectory();
         const baseDir = path.resolve("work", process.env.__OW_ACTIVATION_ID); // base directory without folder name
@@ -79,11 +81,20 @@ describe('prepare.js', () => {
         result = await createDirectories('myfolder', baseDir);
 
         const newBaseDir = path.resolve("work", process.env.__OW_ACTIVATION_ID, "myfolder"); // base directory without folder name
-        assert.strictEqual(result.base,newBaseDir);
+        assert.strictEqual(result.base, newBaseDir);
+        assert.strictEqual(result.in, path.resolve(newBaseDir, "in"));
+        assert.strictEqual(result.out, path.resolve(newBaseDir, "out"));
 
         // check directories were created
-        const existence = await fse.pathExists(newBaseDir);
+        let existence = await fse.pathExists(newBaseDir);
         assert.ok(existence, "Base directory does not exist");
+
+        existence = await fse.pathExists(path.resolve(newBaseDir, "in"));
+        assert.ok(existence, "in directory does not exist");
+
+        existence = await fse.pathExists(path.resolve(newBaseDir, "out"));
+        assert.ok(existence, "out directory does not exist");
+
         // cleanup
         await fse.remove(baseDir);
     });
@@ -93,7 +104,6 @@ describe('prepare.js', () => {
         const folderName = 'folder';
         await fse.mkdir(path.resolve("work"));
         const baseDir = path.resolve("work", process.env.__OW_ACTIVATION_ID, folderName);
-
         await fse.mkdirs(path.resolve(baseDir, "in"));
         await fse.mkdirs(path.resolve(baseDir, "out"));
         let existence = await fse.pathExists(baseDir);
@@ -104,13 +114,20 @@ describe('prepare.js', () => {
         assert.ok(existence, "test setup failed - out directory does not exist");
         existence = false;
 
-        // existence = false;
         const result = await createDirectories(folderName);
         assert.ok(result.base.includes(baseDir));
+        assert.strictEqual(result.in, path.resolve(baseDir, "in"));
+        assert.strictEqual(result.out, path.resolve(baseDir, "out"));
 
         // check directories were created
         existence = await fse.pathExists(baseDir);
         assert.ok(existence, "Base directory does not exist");
+
+        existence = await fse.pathExists(path.resolve(baseDir, "in"));
+        assert.ok(existence, "in directory does not exist");
+
+        existence = await fse.pathExists(path.resolve(baseDir, "out"));
+        assert.ok(existence, "out directory does not exist");
 
         // cleanup
         await fse.remove(baseDir);
@@ -229,6 +246,7 @@ describe('prepare.js', () => {
         existence = await fse.pathExists(path.resolve("work"));
         assert.ok(!existence, "work directory exists");
     });
+
     it('does not throw if directories param is null (no side-effects)', async () => {
         const baseDir = path.resolve("work", process.env.__OW_ACTIVATION_ID);
         const inDir = path.resolve(baseDir, "in");
