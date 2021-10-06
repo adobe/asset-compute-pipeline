@@ -12,16 +12,26 @@
 
 'use strict';
 
+const Action = require("./lib/action");
+const Asset = require("./lib/asset");
+const Prepare = require("./lib/prepare");
+const Rendition = require("./lib/rendition");
+const Storage = require("./lib/storage");
+const Utils = require("./lib/utils");
 const Transformer = require("./lib/transformer");
 const {Plan} = require("./lib/plan");
 const Engine = require("./lib/engine");
 const Manifest = require("./lib/manifest");
-const Sdk = require("./lib/sdk");
 
 module.exports = {
+    Action,
+    Asset,
+    Prepare,
+    Rendition,
+    Storage,
+    Utils,
     Transformer,
     Plan,
     Engine,
     Manifest,
-    Sdk
 };

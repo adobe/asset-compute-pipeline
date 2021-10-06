@@ -20,7 +20,7 @@ const assert = require('assert');
 const sinon = require('sinon');
 
 const path = require('path');
-const {createDirectories, cleanupDirectories, createBaseDirectory} = require('../lib/sdk/prepare');
+const {createDirectories, cleanupDirectories, createBaseDirectory} = require('../lib/prepare');
 
 describe('prepare.js', () => {
     beforeEach(() => {

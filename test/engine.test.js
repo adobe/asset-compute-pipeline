@@ -501,10 +501,9 @@ describe("Pipeline Engine tests", function () {
     });
 
     it("Should generate a presigned url when sourceType is 'URL' with input datauri", async function () {
-        mockRequire('../lib/sdk/storage/temporary-cloud-storage', {TemporaryCloudStorage});
-        mockRequire.reRequire('../lib/sdk/storage/datauri');
-        mockRequire.reRequire('../lib/sdk/storage');
-        mockRequire.reRequire('../lib/sdk');
+        mockRequire('../lib/storage/temporary-cloud-storage', {TemporaryCloudStorage});
+        mockRequire.reRequire('../lib/storage/datauri');
+        mockRequire.reRequire('../lib/storage');
         const Engine = mockRequire.reRequire('../lib/engine');
 
         const pipeline = new Engine();
@@ -537,10 +536,9 @@ describe("Pipeline Engine tests", function () {
     });
 
     it("Should generate a presigned url when sourceType is 'URL' without input url", async function () {
-        mockRequire('../lib/sdk/storage/temporary-cloud-storage', {TemporaryCloudStorage});
-        mockRequire.reRequire('../lib/sdk/storage/datauri');
-        mockRequire.reRequire('../lib/sdk/storage');
-        mockRequire.reRequire('../lib/sdk');
+        mockRequire('../lib/storage/temporary-cloud-storage', {TemporaryCloudStorage});
+        mockRequire.reRequire('../lib/storage/datauri');
+        mockRequire.reRequire('../lib/storage');
         const Engine = mockRequire.reRequire('../lib/engine');
         const pipeline = new Engine();
 
@@ -574,11 +572,10 @@ describe("Pipeline Engine tests", function () {
 
     it("Should download when sourceType is 'LOCAL' with input datauri", async function () {
         let downloadRan = false;
-        mockRequire('../lib/sdk/storage/datauri', {
+        mockRequire('../lib/storage/datauri', {
             download() { downloadRan = true; }
         });
-        mockRequire.reRequire('../lib/sdk/storage');
-        mockRequire.reRequire('../lib/sdk');
+        mockRequire.reRequire('../lib/storage');
         const Engine = mockRequire.reRequire('../lib/engine');
         const pipeline = new Engine();
         pipeline.registerTransformer(new Transformer('test'));
@@ -602,11 +599,10 @@ describe("Pipeline Engine tests", function () {
     it("Should download when sourceType is 'LOCAL' with input url", async function () {
         let downloadRan = false;
         let transformerRan = false;
-        mockRequire('../lib/sdk/storage/http', {
+        mockRequire('../lib/storage/http', {
             download() { downloadRan = true; }
         });
-        mockRequire.reRequire('../lib/sdk/storage');
-        mockRequire.reRequire('../lib/sdk');
+        mockRequire.reRequire('../lib/storage');
         const Engine = mockRequire.reRequire('../lib/engine');
         const pipeline = new Engine();
 
@@ -658,11 +654,10 @@ describe("Pipeline Engine tests", function () {
     it("Should default to LOCAL when no sourceType provided", async function () {
         let downloadRan = false;
         let transformerRan = false;
-        mockRequire('../lib/sdk/storage/http', {
+        mockRequire('../lib/storage/http', {
             download() { downloadRan = true; }
         });
-        mockRequire.reRequire('../lib/sdk/storage');
-        mockRequire.reRequire('../lib/sdk');
+        mockRequire.reRequire('../lib/storage');
         const Engine = mockRequire.reRequire('../lib/engine');
         const pipeline = new Engine();
 
@@ -691,10 +686,9 @@ describe("Pipeline Engine tests", function () {
     });
 
     it("Should error when invalid path is provided", async function () {
-        mockRequire('../lib/sdk/storage/temporary-cloud-storage', {TemporaryCloudStorage});
-        mockRequire.reRequire('../lib/sdk/storage/datauri');
-        mockRequire.reRequire('../lib/sdk/storage');
-        mockRequire.reRequire('../lib/sdk');
+        mockRequire('../lib/storage/temporary-cloud-storage', {TemporaryCloudStorage});
+        mockRequire.reRequire('../lib/storage/datauri');
+        mockRequire.reRequire('../lib/storage');
         const Engine = mockRequire.reRequire('../lib/engine');
         const pipeline = new Engine();
         pipeline.registerTransformer(new Transformer('test'));
