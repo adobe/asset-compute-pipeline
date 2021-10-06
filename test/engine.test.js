@@ -504,6 +504,7 @@ describe("Pipeline Engine tests", function () {
         mockRequire('../lib/temporary-cloud-storage', {TemporaryCloudStorage});
         mockRequire.reRequire('../lib/sdk/storage/datauri');
         mockRequire.reRequire('../lib/sdk/storage');
+        mockRequire.reRequire('../lib/sdk');
         const Engine = mockRequire.reRequire('../lib/engine');
 
         const pipeline = new Engine();
@@ -539,6 +540,7 @@ describe("Pipeline Engine tests", function () {
         mockRequire('../lib/temporary-cloud-storage', {TemporaryCloudStorage});
         mockRequire.reRequire('../lib/sdk/storage/datauri');
         mockRequire.reRequire('../lib/sdk/storage');
+        mockRequire.reRequire('../lib/sdk');
         const Engine = mockRequire.reRequire('../lib/engine');
         const pipeline = new Engine();
 
@@ -576,6 +578,7 @@ describe("Pipeline Engine tests", function () {
             download() { downloadRan = true; }
         });
         mockRequire.reRequire('../lib/sdk/storage');
+        mockRequire.reRequire('../lib/sdk');
         const Engine = mockRequire.reRequire('../lib/engine');
         const pipeline = new Engine();
         pipeline.registerTransformer(new Transformer('test'));
@@ -603,6 +606,7 @@ describe("Pipeline Engine tests", function () {
             download() { downloadRan = true; }
         });
         mockRequire.reRequire('../lib/sdk/storage');
+        mockRequire.reRequire('../lib/sdk');
         const Engine = mockRequire.reRequire('../lib/engine');
         const pipeline = new Engine();
 
@@ -658,6 +662,7 @@ describe("Pipeline Engine tests", function () {
             download() { downloadRan = true; }
         });
         mockRequire.reRequire('../lib/sdk/storage');
+        mockRequire.reRequire('../lib/sdk');
         const Engine = mockRequire.reRequire('../lib/engine');
         const pipeline = new Engine();
 
@@ -689,6 +694,7 @@ describe("Pipeline Engine tests", function () {
         mockRequire('../lib/temporary-cloud-storage', {TemporaryCloudStorage});
         mockRequire.reRequire('../lib/sdk/storage/datauri');
         mockRequire.reRequire('../lib/sdk/storage');
+        mockRequire.reRequire('../lib/sdk');
         const Engine = mockRequire.reRequire('../lib/engine');
         const pipeline = new Engine();
         pipeline.registerTransformer(new Transformer('test'));
