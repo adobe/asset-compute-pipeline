@@ -372,14 +372,14 @@ describe('storage.js', () => {
         it('should fail because of invalid localfile in worker test mode', async () => {
             process.env.WORKER_TEST_MODE = true;
             const paramsSource = {
-                url: 'file/../../../../evilcode/elephant.jpg'
+                url: 'file/../../../evilcode/elephant.jpg'
             };
             const inDirectory = '/in';
             let threw = false;
             try {
                 await getSource(paramsSource, inDirectory);
             } catch (e) {
-                assert.strictEqual(e.message, 'Invalid or missing local file file/../../../../evilcode/elephant.jpg');
+                assert.strictEqual(e.message, 'Invalid or missing local file file/../../../evilcode/elephant.jpg');
                 threw = true;
             }
             assert.ok(threw);

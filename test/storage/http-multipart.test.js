@@ -18,7 +18,7 @@
 const assert = require('assert');
 const mockFs = require('mock-fs');
 const { RenditionTooLarge } = require('@adobe/asset-compute-commons');
-const http =  require('../../../lib/storage/http');
+const http =  require('../../lib/storage/http');
 const nock = require('nock');
 const rimraf = require('rimraf');
 const util = require('util');

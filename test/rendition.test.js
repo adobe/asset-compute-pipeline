@@ -19,10 +19,9 @@ const assert = require('assert');
 
 const mockFs = require('mock-fs');
 const fs = require('fs-extra');
-
-const { Rendition } = require('../lib/rendition');
 const { GenericError } = require('@adobe/asset-compute-commons');
 
+const Rendition = require('../lib/rendition');
 const filePath = "test/files/file.png";
 const PNG_CONTENTS = fs.readFileSync(filePath);
 const PNG_SIZE = fs.statSync(filePath).size;
@@ -123,11 +122,12 @@ describe("rendition.js", () => {
         assert.strictEqual(inst.fmt, "png");
     });
 
-    it('verifies metadata works properly', async function () {
+    it('verifies metadata works properly (non-pipeline)', async function () {
         const instructions = { "fmt": "png", "target": "TargetName" };
         const directory = "/";
+        const isPipelineRendition = false;
         await fs.writeFile("/rendition11.png", PNG_CONTENTS);
-        let rendition = new Rendition(instructions, directory, 11);
+        let rendition = new Rendition(instructions, directory, 11, isPipelineRendition);
         let metadata = await rendition.metadata();
 
         // metadata we got through cmd file call will not work here (mockFs messes it up)
@@ -140,10 +140,31 @@ describe("rendition.js", () => {
 
         // now not a real image so getting the image width and height will fail
         fs.writeFileSync("/rendition11.png", 'hello world');
-        rendition = new Rendition(instructions, directory, 11);
+        rendition = new Rendition(instructions, directory, 11, isPipelineRendition);
         metadata = await rendition.metadata();
         assert.strictEqual(metadata["repo:size"], 11);
         assert.strictEqual(metadata["repo:sha1"], "2aae6c35c94fcfb415dbe95f408b9ce91ee846ed");
+    });
+
+    it('verifies metadata works properly (pipeline)', async function () {
+        const instructions = { "fmt": "png", "target": "TargetName" };
+        const directory = "/";
+        await fs.writeFile("/rendition11.png", PNG_CONTENTS);
+        let rendition = new Rendition(instructions, directory, 11);
+        let metadata = await rendition.metadata();
+
+        // metadata we got through cmd file call will not work here (mockFs messes it up)
+        assert.strictEqual(metadata["repo:size"], 193011);
+        assert.strictEqual(metadata["tiff:imageWidth"], 512);
+        assert.strictEqual(metadata["tiff:imageHeight"], 288);
+        assert.strictEqual(metadata["dc:format"], "image/png");
+        assert.ok(metadata["repo:encoding"] === undefined);
+
+        // now not a real image so getting the image width and height will fail
+        fs.writeFileSync("/rendition11.png", 'hello world');
+        rendition = new Rendition(instructions, directory, 11);
+        metadata = await rendition.metadata();
+        assert.strictEqual(metadata["repo:size"], 11);
     });
 
     it('verifies metadata from missing file does not fail', async function () {

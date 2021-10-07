@@ -18,7 +18,7 @@
 const assert = require('assert');
 const mockFs = require("mock-fs");
 const fs = require('fs-extra');
-const { download, upload } = require('../../../lib/storage/http');
+const { download, upload } = require('../../lib/storage/http');
 const nock = require('nock');
 
 const http = require('@adobe/httptransfer');

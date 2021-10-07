@@ -15,7 +15,7 @@
 
 'use strict';
 
-const { detectContentType } = require('../../../lib').Utils;
+const { detectContentType } = require('../../lib/utils');
 const assert = require('assert');
 const mockRequire = require("mock-require");
 
@@ -78,7 +78,7 @@ describe("type.js", () => {
                     throw new Error('file command failure simulation');
                 }
             });
-            const detectContentType = mockRequire.reRequire('../../../lib/utils/type');
+            const detectContentType = mockRequire.reRequire('../../lib/utils/type');
 
             assert.deepStrictEqual(await detectContentType('./test/files/file.jpg'), {
                 mime: "image/jpeg"

@@ -27,7 +27,7 @@ const debug = require('debug')('test:engine');
 const nock = require('nock');
 const mockRequire = require("mock-require");
 
-const { TemporaryCloudStorage } = require('./sdk/storage/mock-temporary-cloud-storage');
+const { TemporaryCloudStorage } = require('./storage/mock-temporary-cloud-storage');
 const Engine = require("../lib/engine");
 const { Plan } = require("../lib/plan");
 const Transformer = require("../lib/transformer");

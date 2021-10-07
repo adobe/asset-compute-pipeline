@@ -33,5 +33,5 @@ module.exports = {
     Transformer,
     Plan,
     Engine,
-    Manifest,
+    Manifest
 };

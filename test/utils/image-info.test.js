@@ -19,7 +19,7 @@ const assert = require('assert');
 const nock = require('nock');
 const fs = require('fs-extra');
 const readChunk = require('read-chunk');
-const { ImageInfo } = require('../../../lib').Utils;
+const { ImageInfo } = require('../../lib/utils');
 const bytesToRead = 10000;
 
 describe("image-info.js", function (){
