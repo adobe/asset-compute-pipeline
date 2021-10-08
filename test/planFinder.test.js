@@ -31,7 +31,7 @@ const PlanFinder = require("../lib/plan-finder");
 const Transformer = require("../lib/transformer");
 const assert = require('assert');
 const { TransformerGIF, TransformerPNG, TransformerSensei, TransformerImage } = require('./transformers/testTransformers');
-const {RenditionFormatUnsupportedError, SourceCorruptError} = require('@adobe/asset-compute-commons');
+const { RenditionFormatUnsupportedError, SourceCorruptError } = require('@adobe/asset-compute-commons');
 
 function assertPlan(plan, string, obj) {
     assert.strictEqual(plan.toString(), string);
