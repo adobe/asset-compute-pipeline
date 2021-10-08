@@ -55,6 +55,7 @@
     "fs-extra": "^10.0.0",
     "graph-data-structure": "^1.15.0",
     "image-size": "^1.0.0",
+    "mime-types": "^2.1.33",
     "valid-data-url": "^4.0.0"
   }
 }
