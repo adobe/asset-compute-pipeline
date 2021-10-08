@@ -63,6 +63,17 @@ describe("rendition.js", () => {
         assert.strictEqual(rendition.index, 0);
         assert.strictEqual(rendition.target, "file with blanks");
     });
+
+    it('verifies isPipelineRendition parameter is set properly', async function () {
+        // First use a real image in the rendition
+        const instructions = { "fmt": "png", "target": "TargetName" };
+        const directory = "/";
+        let rendition = new Rendition(instructions, directory, 11);
+        assert.strictEqual(rendition.pipeline, true);
+        rendition = new Rendition(instructions, directory, 11, false);
+        assert.strictEqual(rendition.pipeline, false);
+    });
+
     it('verifies method size works properly', async function () {
         // First use a real image in the rendition
         const instructions = { "fmt": "png", "target": "TargetName" };
@@ -186,13 +197,14 @@ describe("rendition.js", () => {
         extension = "tif";
         assert.strictEqual(Rendition.renditionFilename(extension, index), "rendition100.tif");
     });
-    it('verifies function forEach', function () {
+    it('verifies function forEach (pipeline)', function () {
         const outDirectory = "out";
         const renditionInstructions = [
             { "fmt": "png" },
             { "fmt": "jpeg" }
         ];
-        const renditions = Rendition.forEach(renditionInstructions, outDirectory);
+        const isPipelineRendition = true;
+        const renditions = Rendition.forEach(renditionInstructions, outDirectory, isPipelineRendition);
         assert.strictEqual(renditions.length, 2);
         assert.strictEqual(renditions[0].directory, outDirectory);
         assert.strictEqual(renditions[1].directory, outDirectory);
@@ -204,6 +216,31 @@ describe("rendition.js", () => {
         assert.strictEqual(renditions[1].index, 1);
         assert.strictEqual(renditions[0].instructions.fmt, "png");
         assert.strictEqual(renditions[1].instructions.fmt, "jpeg");
+        assert.strictEqual(renditions[0].pipeline, true);
+        assert.strictEqual(renditions[1].pipeline, true);
+    });
+
+    it('verifies function forEach (non-pipeline)', function () {
+        const outDirectory = "out";
+        const renditionInstructions = [
+            { "fmt": "png" },
+            { "fmt": "jpeg" }
+        ];
+        const isPipelineRendition = false;
+        const renditions = Rendition.forEach(renditionInstructions, outDirectory, isPipelineRendition);
+        assert.strictEqual(renditions.length, 2);
+        assert.strictEqual(renditions[0].directory, outDirectory);
+        assert.strictEqual(renditions[1].directory, outDirectory);
+        assert.strictEqual(renditions[0].name, "rendition0.png");
+        assert.strictEqual(renditions[1].name, "rendition1.jpeg");
+        assert.strictEqual(renditions[0].path, "out/rendition0.png");
+        assert.strictEqual(renditions[1].path, "out/rendition1.jpeg");
+        assert.strictEqual(renditions[0].index, 0);
+        assert.strictEqual(renditions[1].index, 1);
+        assert.strictEqual(renditions[0].instructions.fmt, "png");
+        assert.strictEqual(renditions[1].instructions.fmt, "jpeg");
+        assert.strictEqual(renditions[0].pipeline, false);
+        assert.strictEqual(renditions[1].pipeline, false);
     });
 
     it('can set mimetype+encoding (for image)', async function () {
