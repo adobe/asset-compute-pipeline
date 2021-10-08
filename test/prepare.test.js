@@ -73,12 +73,31 @@ describe('prepare.js', () => {
         await fse.remove(baseDir);
     });
 
-    it('creates needed directories, from base directory', async () => {
+    it('creates needed directories, from base directory (pipeline)', async () => {
         let result = createBaseDirectory();
         const baseDir = path.resolve("work", process.env.__OW_ACTIVATION_ID); // base directory without folder name
         assert.strictEqual(result, baseDir);
 
         result = await createDirectories('myfolder', baseDir);
+
+        const newBaseDir = path.resolve("work", process.env.__OW_ACTIVATION_ID, "myfolder"); // base directory without folder name
+        assert.strictEqual(result.base, newBaseDir);
+
+        // check directories were created
+        const existence = await fse.pathExists(newBaseDir);
+        assert.ok(existence, "Base directory does not exist");
+
+        // cleanup
+        await fse.remove(baseDir);
+    });
+
+    it('creates needed directories, from base directory (non-pipeline)', async () => {
+        let result = createBaseDirectory();
+        const baseDir = path.resolve("work", process.env.__OW_ACTIVATION_ID); // base directory without folder name
+        assert.strictEqual(result, baseDir);
+
+        const pipeline = false;
+        result = await createDirectories('myfolder', baseDir, pipeline);
 
         const newBaseDir = path.resolve("work", process.env.__OW_ACTIVATION_ID, "myfolder"); // base directory without folder name
         assert.strictEqual(result.base, newBaseDir);
@@ -99,7 +118,28 @@ describe('prepare.js', () => {
         await fse.remove(baseDir);
     });
 
-    it('does not throw if directories to create already exist', async () => {
+    it('does not throw if directories to create already exist (pipeline)', async () => {
+        // make sure directories exist
+        const folderName = 'folder';
+        await fse.mkdir(path.resolve("work"));
+        const baseDir = path.resolve("work", process.env.__OW_ACTIVATION_ID, folderName);
+        await fse.mkdirs(baseDir);
+        let existence = await fse.pathExists(baseDir);
+        assert.ok(existence, "test setup failed - base directory does not exist");
+        existence = false;
+
+        const result = await createDirectories(folderName);
+        assert.ok(result.base.includes(baseDir));
+
+        // check directories were created
+        existence = await fse.pathExists(baseDir);
+        assert.ok(existence, "Base directory does not exist");
+
+        // cleanup
+        await fse.remove(baseDir);
+    });
+
+    it('does not throw if directories to create already exist (non-pipeline)', async () => {
         // make sure directories exist
         const folderName = 'folder';
         await fse.mkdir(path.resolve("work"));
@@ -114,7 +154,8 @@ describe('prepare.js', () => {
         assert.ok(existence, "test setup failed - out directory does not exist");
         existence = false;
 
-        const result = await createDirectories(folderName);
+        const pipeline = false;
+        const result = await createDirectories(folderName, '', pipeline);
         assert.ok(result.base.includes(baseDir));
         assert.strictEqual(result.in, path.resolve(baseDir, "in"));
         assert.strictEqual(result.out, path.resolve(baseDir, "out"));
