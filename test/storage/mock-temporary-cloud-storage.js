@@ -1,3 +1,4 @@
+
 /*
  * Copyright 2021 Adobe. All rights reserved.
  * This file is licensed to you under the Apache License, Version 2.0 (the "License");
@@ -43,9 +44,12 @@ class TemporaryCloudStorage {
         if(!this.aioLibFiles){
             await this._init();
         }
-        console.log(`Mock presignedUrl, 
-        locationFilePath ${this.localFilePath}, permissions ${permissions}, expiry ${expiryInSeconds}` );
+        console.log(`Mock presignedUrl, localFilePath ${this.localFilePath}, permissions ${permissions}, expiry ${expiryInSeconds}` );
         
+        if(this.localFilePath === 'fakeInvalidFilePath') {
+            throw Error(`Mock PresignUrl generation error ${this.localFilePath}`);
+        }
+
         this.preSignUrl += this.localFilePath;
         return this.preSignUrl;
     }

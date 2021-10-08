@@ -18,8 +18,8 @@
 const assert = require('assert');
 const mockFs = require("mock-fs");
 const fs = require('fs-extra');
-const { download } = require('../../../lib/sdk/storage/datauri');
-const { TemporaryCloudStorage } = require('../mock-test-cloud-storage');
+const { download } = require('../../lib/storage/datauri');
+const { TemporaryCloudStorage } = require('./mock-temporary-cloud-storage');
 const mockRequire = require("mock-require");
 const nock = require('nock');
 
@@ -75,8 +75,8 @@ describe('datauri.js', () => {
             path: "fakeSuccessFilePath"
         };
         mockFs.restore();
-        mockRequire('../../../lib/temporary-cloud-storage', {TemporaryCloudStorage});
-        const datauri = mockRequire.reRequire('../../../lib/sdk/storage/datauri');
+        mockRequire('../../lib/storage/temporary-cloud-storage', {TemporaryCloudStorage});
+        const datauri = mockRequire.reRequire('../../lib/storage/datauri');
         const preSignedUrl = await datauri.getPreSignedUrl(source.path);
         assert.strictEqual(preSignedUrl,`http://storage.com/preSignUrl/${source.path}`);
     });
@@ -88,8 +88,8 @@ describe('datauri.js', () => {
             path: "fakeRetrySuccessFilePath"
         };
         mockFs.restore();
-        mockRequire('../../../lib/temporary-cloud-storage', {TemporaryCloudStorage});
-        const datauri = mockRequire.reRequire('../../../lib/sdk/storage/datauri');
+        mockRequire('../../lib/storage/temporary-cloud-storage', {TemporaryCloudStorage});
+        const datauri = mockRequire.reRequire('../../lib/storage/datauri');
         const preSignedUrl = await datauri.getPreSignedUrl(source.path);
         assert.strictEqual(preSignedUrl,`http://storage.com/preSignUrl/${source.path}`);
     });
@@ -101,8 +101,8 @@ describe('datauri.js', () => {
             path: "fakeFailureFilePath"
         };
         mockFs.restore();
-        mockRequire('../../../lib/temporary-cloud-storage', {TemporaryCloudStorage});
-        const datauri = mockRequire.reRequire('../../../lib/sdk/storage/datauri');
+        mockRequire('../../lib/storage/temporary-cloud-storage', {TemporaryCloudStorage});
+        const datauri = mockRequire.reRequire('../../lib/storage/datauri');
         try{
             await datauri.getPreSignedUrl(source.path, 0);
         }catch(e){

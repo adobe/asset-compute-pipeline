@@ -18,7 +18,7 @@
 const assert = require('assert');
 const mockFs = require('mock-fs');
 
-const {getSource, putRendition, getAsset} = require('../../lib/sdk/storage');
+const {getSource, putRendition, getAsset} = require('../../lib/storage');
 const nock = require('nock');
 const mockRequire = require("mock-require");
 const fs = require('fs-extra');
@@ -141,7 +141,7 @@ describe('storage.js', () => {
             const disableSourceDownload = true;
 
             mockFs.restore();
-            mockRequire('../../lib/sdk/storage/datauri', {
+            mockRequire('../../lib/storage/datauri', {
                 getPreSignedUrl : (source) => {
                     console.log('Mocked source : ' + source);
                     return 'https://example.com/preSignedUrl';
@@ -150,7 +150,7 @@ describe('storage.js', () => {
                     console.log('Fake file downloaded');
                 }
             });
-            const {getAsset} = mockRequire.reRequire("../../lib/sdk/storage");
+            const {getAsset} = mockRequire.reRequire("../../lib/storage");
             mockFs({'./in/fakeSource/filePath': {}});
             // This is mocked to pass the fileExistsCheck
             fs.writeFileSync('./in/fakeSource/filePath/source','something');
@@ -168,7 +168,7 @@ describe('storage.js', () => {
             };
             
             mockFs.restore();
-            mockRequire('../../lib/sdk/storage/datauri', {
+            mockRequire('../../lib/storage/datauri', {
                 getPreSignedUrl : (source) => {
                     console.log('Mocked source : ' + source);
                     return 'https://example.com/preSignedUrl';
@@ -182,7 +182,7 @@ describe('storage.js', () => {
             const name = 'source';
             const disableSourceDownload = true;
 
-            const {getAsset} = mockRequire.reRequire("../../lib/sdk/storage");
+            const {getAsset} = mockRequire.reRequire("../../lib/storage");
             const source = await getAsset(assetReference, directory, name, disableSourceDownload);
             assert.strictEqual(source.name, 'source');
             assert.strictEqual(source.path, 'in/fakeSource/filePath/source');
@@ -214,7 +214,7 @@ describe('storage.js', () => {
             const name = 'source';
             const disableSourceDownload = true;
             mockFs.restore();
-            mockRequire('../../lib/sdk/storage/datauri', {
+            mockRequire('../../lib/storage/datauri', {
                 getPreSignedUrl : (source) => {
                     console.log('Mocked source : ' + source);
                     return 'https://example.com/preSignedUrl';
@@ -372,14 +372,14 @@ describe('storage.js', () => {
         it('should fail because of invalid localfile in worker test mode', async () => {
             process.env.WORKER_TEST_MODE = true;
             const paramsSource = {
-                url: 'file/../../../../evilcode/elephant.jpg'
+                url: 'file/../../../evilcode/elephant.jpg'
             };
             const inDirectory = '/in';
             let threw = false;
             try {
                 await getSource(paramsSource, inDirectory);
             } catch (e) {
-                assert.strictEqual(e.message, 'Invalid or missing local file file/../../../../evilcode/elephant.jpg');
+                assert.strictEqual(e.message, 'Invalid or missing local file file/../../../evilcode/elephant.jpg');
                 threw = true;
             }
             assert.ok(threw);
