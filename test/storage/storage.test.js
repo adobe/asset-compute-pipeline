@@ -18,7 +18,7 @@
 const assert = require('assert');
 const mockFs = require('mock-fs');
 
-const {getSource, putRendition, getAsset} = require('../../lib/storage');
+const Storage = require('../../lib/storage');
 const nock = require('nock');
 const mockRequire = require("mock-require");
 const fs = require('fs-extra');
@@ -56,7 +56,7 @@ describe('storage.js', () => {
                 .get('/photo/elephant.png')
                 .reply(200, 'ok');
 
-            const source = await getAsset(assetReference, directory, name);
+            const source = await Storage.getAsset(assetReference, directory, name);
 
             assert.strictEqual(source.name, 'source.png');
             assert.strictEqual(source.path, 'in/fakeSource/filePath/source.png');
@@ -81,7 +81,7 @@ describe('storage.js', () => {
                 .matchHeader('Authorization', 'Basic base64stringGoesHere')
                 .reply(200, 'ok');
 
-            const source = await getAsset(assetReference, directory, name);
+            const source = await Storage.getAsset(assetReference, directory, name);
 
             assert.strictEqual(source.name, 'source.png');
             assert.strictEqual(source.path, 'in/fakeSource/filePath/source.png');
@@ -106,7 +106,7 @@ describe('storage.js', () => {
                 .matchHeader('Authorization', 'Bearer thereGoesTheToken')
                 .reply(200, 'ok');
 
-            const source = await getAsset(assetReference, directory, name);
+            const source = await Storage.getAsset(assetReference, directory, name);
 
             assert.strictEqual(source.name, 'source.png');
             assert.strictEqual(source.path, 'in/fakeSource/filePath/source.png');
@@ -123,7 +123,7 @@ describe('storage.js', () => {
             mockFs({ './in/fakeSource/filePath': {} });
             assert.ok(fs.existsSync(directory));
 
-            const source = await getAsset(assetReference, directory, name);
+            const source = await Storage.getAsset(assetReference, directory, name);
 
             assert.strictEqual(source.name, 'source');
             assert.strictEqual(source.path, 'in/fakeSource/filePath/source');
@@ -150,12 +150,12 @@ describe('storage.js', () => {
                     console.log('Fake file downloaded');
                 }
             });
-            const {getAsset} = mockRequire.reRequire("../../lib/storage");
+            const Storage = mockRequire.reRequire("../../lib/storage");
             mockFs({'./in/fakeSource/filePath': {}});
             // This is mocked to pass the fileExistsCheck
             fs.writeFileSync('./in/fakeSource/filePath/source','something');
             assert.ok(fs.existsSync(directory));
-            const source = await getAsset(assetReference, directory, name, disableSourceDownload);
+            const source = await Storage.getAsset(assetReference, directory, name, disableSourceDownload);
             console.log(source);
             assert.strictEqual(source.name, 'source');
             assert.strictEqual(source.path, 'in/fakeSource/filePath/source');
@@ -182,8 +182,8 @@ describe('storage.js', () => {
             const name = 'source';
             const disableSourceDownload = true;
 
-            const {getAsset} = mockRequire.reRequire("../../lib/storage");
-            const source = await getAsset(assetReference, directory, name, disableSourceDownload);
+            const Storage = mockRequire.reRequire("../../lib/storage");
+            const source = await Storage.getAsset(assetReference, directory, name, disableSourceDownload);
             assert.strictEqual(source.name, 'source');
             assert.strictEqual(source.path, 'in/fakeSource/filePath/source');
             assert.strictEqual(source.params.url, 'https://nondatauriurl.com/example.png');
@@ -199,7 +199,7 @@ describe('storage.js', () => {
             mockFs({ './in/fakeSource/filePath': {} });
             assert.ok(fs.existsSync(directory));
             try {
-                await getAsset(assetReference, directory, name, disableSourceDownload);
+                await Storage.getAsset(assetReference, directory, name, disableSourceDownload);
             } catch (e) {
                 assert.strictEqual(e.name, 'SourceUnsupportedError');
                 assert.strictEqual(e.message, 'Invalid or missing local file in/fakeSource/filePath/source');
@@ -226,7 +226,7 @@ describe('storage.js', () => {
             mockFs({ './in/fakeSource/filePath': {} });
             assert.ok(fs.existsSync(directory));
             try {
-                await getAsset(assetReference, directory, name, disableSourceDownload);
+                await Storage.getAsset(assetReference, directory, name, disableSourceDownload);
             } catch (e) {
                 assert.strictEqual(e.name, 'SourceUnsupportedError');
                 assert.strictEqual(e.message, 'Invalid or missing local file in/fakeSource/filePath/source');
@@ -235,7 +235,7 @@ describe('storage.js', () => {
 
         it('should fail to download, no asset reference', async () => {
             try {
-                await getAsset();
+                await Storage.getAsset();
                 assert.fail('Should fail');
             } catch (error) {
                 assert.strictEqual(error.message, 'Missing assetReference');
@@ -254,7 +254,7 @@ describe('storage.js', () => {
                 .get('/photo/elephant.png')
                 .reply(200, 'ok');
 
-            const source = await getAsset(assetReference, directory, name);
+            const source = await Storage.getAsset(assetReference, directory, name);
 
             assert.strictEqual(source.name, 'source.png');
             assert.strictEqual(source.path, 'in/fakeSource/filePath/source.png');
@@ -286,7 +286,7 @@ describe('storage.js', () => {
                 .get('/photo/elephant.png')
                 .reply(200, 'ok');
 
-            const source = await getSource(paramsSource, inDirectory);
+            const source = await Storage.getSource(paramsSource, inDirectory);
 
             assert.strictEqual(source.name, 'source.png');
             assert.strictEqual(source.path, 'in/fakeSource/filePath/source.png');
@@ -302,7 +302,7 @@ describe('storage.js', () => {
             mockFs({ './in/fakeSource/filePath': {} });
             assert.ok(fs.existsSync(inDirectory));
 
-            const source = await getSource(paramsSource, inDirectory);
+            const source = await Storage.getSource(paramsSource, inDirectory);
 
             assert.strictEqual(source.name, 'source');
             assert.strictEqual(source.path, 'in/fakeSource/filePath/source');
@@ -327,7 +327,7 @@ describe('storage.js', () => {
 
             let threw = false;
             try {
-                await getSource(paramsSource, inDirectory);
+                await Storage.getSource(paramsSource, inDirectory);
             } catch (e) {
                 console.log(e);
                 assert.ok(e instanceof GenericError);
@@ -346,7 +346,7 @@ describe('storage.js', () => {
 
             mockFs({ '/in/file.jpg': 'yo' });
 
-            const source = await getSource(paramsSource, inDirectory);
+            const source = await Storage.getSource(paramsSource, inDirectory);
 
             assert.strictEqual(source.name, 'file.jpg'); // in this case source name is actual file path
             assert.strictEqual(source.path, '/in/file.jpg');
@@ -361,7 +361,7 @@ describe('storage.js', () => {
 
             let threw = false;
             try {
-                await getSource(paramsSource, inDirectory);
+                await Storage.getSource(paramsSource, inDirectory);
             } catch (e) {
                 assert.strictEqual(e.message, 'Invalid or missing local file file.jpg/..');
                 threw = true;
@@ -377,7 +377,7 @@ describe('storage.js', () => {
             const inDirectory = '/in';
             let threw = false;
             try {
-                await getSource(paramsSource, inDirectory);
+                await Storage.getSource(paramsSource, inDirectory);
             } catch (e) {
                 assert.strictEqual(e.message, 'Invalid or missing local file file/../../../evilcode/elephant.jpg');
                 threw = true;
@@ -393,7 +393,7 @@ describe('storage.js', () => {
             const inDirectory = '/in';
             let threw = false;
             try {
-                await getSource(paramsSource, inDirectory);
+                await Storage.getSource(paramsSource, inDirectory);
             } catch (e) {
                 assert.strictEqual(e.message, 'Invalid or missing local file elephant.jpg');
                 threw = true;
@@ -415,7 +415,7 @@ describe('storage.js', () => {
                 .get('/photo/elephant.png')
                 .reply(200, 'ok');
 
-            const source = await getSource(paramsSource, inDirectory);
+            const source = await Storage.getSource(paramsSource, inDirectory);
 
             assert.strictEqual(source.name, 'source.png');
             assert.strictEqual(source.path, 'in/fakeSource/filePath/source.png');
@@ -436,7 +436,7 @@ describe('storage.js', () => {
                 .get('/photo/elephant.png')
                 .reply(200, 'ok');
 
-            const source = await getSource(paramsSource, inDirectory);
+            const source = await Storage.getSource(paramsSource, inDirectory);
 
             assert.strictEqual(source.name, 'source.png');
             assert.strictEqual(source.path, 'in/fakeSource/filePath/source.png');
@@ -458,7 +458,7 @@ describe('storage.js', () => {
                 .get('/photo/elephant.png')
                 .reply(200, 'ok');
 
-            const source = await getSource(paramsSource, inDirectory);
+            const source = await Storage.getSource(paramsSource, inDirectory);
 
             assert.strictEqual(source.name, 'source.jpeg');
             assert.strictEqual(source.path, 'in/fakeSource/filePath/source.jpeg');
@@ -480,7 +480,7 @@ describe('storage.js', () => {
                 .get('/photo/elephant.jpeg')
                 .reply(200, 'ok');
 
-            const source = await getSource(paramsSource, inDirectory);
+            const source = await Storage.getSource(paramsSource, inDirectory);
 
             assert.strictEqual(source.name, 'source');
             assert.strictEqual(source.path, 'in/fakeSource/filePath/source');
@@ -502,7 +502,7 @@ describe('storage.js', () => {
                 .get('/photo/elephant.jpeg')
                 .reply(200, 'ok');
 
-            const source = await getSource(paramsSource, inDirectory);
+            const source = await Storage.getSource(paramsSource, inDirectory);
 
             assert.strictEqual(source.name, 'source.png');
             assert.strictEqual(source.path, 'in/fakeSource/filePath/source.png');
@@ -519,7 +519,7 @@ describe('storage.js', () => {
                 .get('/photo/elephant.png')
                 .reply(200, 'ok');
 
-            const source = await getSource(paramsSource, inDirectory);
+            const source = await Storage.getSource(paramsSource, inDirectory);
 
             assert.strictEqual(source.name, 'source.png');
             assert.strictEqual(source.path, 'in/fakeSource/filePath/source.png');
@@ -532,7 +532,7 @@ describe('storage.js', () => {
 
             mockFs({ '/in/file.jpg': 'yo' });
 
-            const source = await getSource(paramsSource, inDirectory);
+            const source = await Storage.getSource(paramsSource, inDirectory);
 
             assert.strictEqual(source.name, 'file.jpg'); // in this case source name is actual file path
             assert.strictEqual(source.path, '/in/file.jpg');
@@ -571,7 +571,7 @@ describe('storage.js', () => {
                 .reply(200);
 
             assert.ok(fs.existsSync(file));
-            await putRendition(rendition);
+            await Storage.putRendition(rendition);
             assert.ok(nock.isDone());
 
         });
@@ -597,7 +597,7 @@ describe('storage.js', () => {
                 .reply(200);
 
             assert.ok(fs.existsSync(file));
-            await putRendition(rendition);
+            await Storage.putRendition(rendition);
             assert.ok(nock.isDone());
         });
 
@@ -625,7 +625,7 @@ describe('storage.js', () => {
                 .reply(200);
 
             assert.ok(fs.existsSync(file));
-            await putRendition(rendition, {});
+            await Storage.putRendition(rendition, {});
             assert.ok(fs.existsSync(file));
             assert.ok(fs.existsSync(requestedFile));
             assert.ok(! nock.isDone());
@@ -655,7 +655,7 @@ describe('storage.js', () => {
 
 
             assert.ok(fs.existsSync(file));
-            await putRendition(rendition);
+            await Storage.putRendition(rendition);
             assert.ok(fs.existsSync(file));
         });
     });
