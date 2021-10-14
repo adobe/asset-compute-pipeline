@@ -26,6 +26,7 @@ debugConfig.enable("pipeline:*,test:*");
 const debug = require('debug')('test:engine');
 const nock = require('nock');
 const mockRequire = require("mock-require");
+const {Reason, GenericError, RenditionFormatUnsupportedError, RenditionTooLarge, SourceFormatUnsupportedError} = require('@adobe/asset-compute-commons');
 
 const { TemporaryCloudStorage } = require('./storage/mock-temporary-cloud-storage');
 const Engine = require("../lib/engine");
@@ -468,6 +469,79 @@ describe("Pipeline Engine tests", function () {
         const result = await pipeline.run(plan);
         assert.ok(result.renditionErrors);
         assert.strictEqual(result.renditionErrors[0].message, "No source file accessible.");
+    });
+
+    it("Runs a pipeline where transformer throws RenditionFormatUnsupportedError (pass through)", async function () {
+        const pipeline = new Engine();
+        class TestTransformer extends Transformer {
+            async compute() {
+                debug('Running the TestTransformer!');
+                throw new RenditionFormatUnsupportedError("error passed through");
+            }
+        }
+        pipeline.registerTransformer(new TestTransformer('test'));
+
+        const plan = new Plan();
+        plan.add("test", DEFAULT_ATTRIBUTES);
+
+        const result = await pipeline.run(plan);
+        assert.ok(result.renditionErrors);
+        assert.strictEqual(result.renditionErrors[0].message, "error passed through");
+        assert.strictEqual(result.renditionErrors[0].reason, Reason.RenditionFormatUnsupported);
+    });
+    it("Runs a pipeline where transformer throws RenditionTooLarge (pass through)", async function () {
+        const pipeline = new Engine();
+        class TestTransformer extends Transformer {
+            async compute() {
+                debug('Running the TestTransformer!');
+                throw new RenditionTooLarge("error passed through");
+            }
+        }
+        pipeline.registerTransformer(new TestTransformer('test'));
+
+        const plan = new Plan();
+        plan.add("test", DEFAULT_ATTRIBUTES);
+
+        const result = await pipeline.run(plan);
+        assert.ok(result.renditionErrors);
+        assert.strictEqual(result.renditionErrors[0].message, "error passed through");
+        assert.strictEqual(result.renditionErrors[0].reason, Reason.RenditionTooLarge);
+    });
+    it("Runs a pipeline where transformer throws SourceFormatUnsupportedError (pass through)", async function () {
+        const pipeline = new Engine();
+        class TestTransformer extends Transformer {
+            async compute() {
+                debug('Running the TestTransformer!');
+                throw new SourceFormatUnsupportedError("error passed through");
+            }
+        }
+        pipeline.registerTransformer(new TestTransformer('test'));
+
+        const plan = new Plan();
+        plan.add("test", DEFAULT_ATTRIBUTES);
+
+        const result = await pipeline.run(plan);
+        assert.ok(result.renditionErrors);
+        assert.strictEqual(result.renditionErrors[0].message, "error passed through");
+        assert.strictEqual(result.renditionErrors[0].reason, Reason.SourceFormatUnsupported);
+    });
+    it("Runs a pipeline where transformer throws an unknown error (wrap in GenericError", async function () {
+        const pipeline = new Engine();
+        class TestTransformer extends Transformer {
+            async compute() {
+                debug('Running the TestTransformer!');
+                throw new Error("custom error");
+            }
+        }
+        pipeline.registerTransformer(new TestTransformer('test'));
+
+        const plan = new Plan();
+        plan.add("test", DEFAULT_ATTRIBUTES);
+
+        const result = await pipeline.run(plan);
+        assert.ok(result.renditionErrors);
+        assert.strictEqual(result.renditionErrors[0].message, "Transformer test failed: custom error");
+        assert.strictEqual(result.renditionErrors[0].name, GenericError.name);
     });
 
     it("Check original source file is passed to transformer", async function () {
