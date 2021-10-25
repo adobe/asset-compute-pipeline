@@ -65,7 +65,7 @@ describe("Test export index.js", function() {
         assert.strictEqual(typeof pipeline.Prepare, "function");
         assert.strictEqual(typeof pipeline.Rendition, "function");
         assert.strictEqual(typeof pipeline.Storage, "function");
-        assert.strictEqual(typeof pipeline.Utils, "object");
+        assert.strictEqual(typeof pipeline.Utils, "function");
         assert.strictEqual(typeof pipeline.Engine, "function");
         assert.strictEqual(typeof pipeline.Manifest, "function");
         assert.strictEqual(typeof pipeline.Transformer, "function");
