@@ -674,7 +674,10 @@ describe("Pipeline Engine tests", function () {
         let downloadRan = false;
         let transformerRan = false;
         mockRequire('../lib/storage/http', {
-            download() { downloadRan = true; }
+            download() { 
+                downloadRan = true;
+                console.log(`Fake download success`);
+            }
         });
         mockRequire.reRequire('../lib/storage');
         const Engine = mockRequire.reRequire('../lib/engine');

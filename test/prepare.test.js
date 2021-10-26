@@ -20,7 +20,7 @@ const assert = require('assert');
 const sinon = require('sinon');
 
 const path = require('path');
-const {createDirectories, cleanupDirectories, createBaseDirectory} = require('../lib/prepare');
+const { Prepare } = require('../lib/prepare');
 
 describe('prepare.js', () => {
     beforeEach(() => {
@@ -34,7 +34,7 @@ describe('prepare.js', () => {
         fse.removeSync(path.resolve("work"));
     });
     it('creates base directories', async () => {
-        const result = createBaseDirectory();
+        const result = Prepare.createBaseDirectory();
         const baseDir = path.resolve("work", process.env.__OW_ACTIVATION_ID); // base directory without folder name
         assert.strictEqual(result, baseDir);
 
@@ -46,7 +46,7 @@ describe('prepare.js', () => {
     });
 
     it('creates needed directories, no folder name', async () => {
-        const result = await createDirectories();
+        const result = await Prepare.createDirectories();
 
         const baseDir = path.resolve("work", process.env.__OW_ACTIVATION_ID); // base directory without folder name
         assert.strictEqual(result.base,baseDir);
@@ -59,7 +59,7 @@ describe('prepare.js', () => {
     });
 
     it('creates needed directories with folder prefix', async () => {
-        const result = await createDirectories('myfolder');
+        const result = await Prepare.createDirectories('myfolder');
 
         const baseDir = path.resolve("work", process.env.__OW_ACTIVATION_ID, 'myfolder');
 
@@ -74,11 +74,11 @@ describe('prepare.js', () => {
     });
 
     it('creates needed directories, from base directory (pipeline)', async () => {
-        let result = createBaseDirectory();
+        let result = Prepare.createBaseDirectory();
         const baseDir = path.resolve("work", process.env.__OW_ACTIVATION_ID); // base directory without folder name
         assert.strictEqual(result, baseDir);
 
-        result = await createDirectories('myfolder', baseDir);
+        result = await Prepare.createDirectories('myfolder', baseDir);
 
         const newBaseDir = path.resolve("work", process.env.__OW_ACTIVATION_ID, "myfolder"); // base directory without folder name
         assert.strictEqual(result.base, newBaseDir);
@@ -92,12 +92,12 @@ describe('prepare.js', () => {
     });
 
     it('creates needed directories, from base directory (non-pipeline)', async () => {
-        let result = createBaseDirectory();
+        let result = Prepare.createBaseDirectory();
         const baseDir = path.resolve("work", process.env.__OW_ACTIVATION_ID); // base directory without folder name
         assert.strictEqual(result, baseDir);
 
         const pipeline = false;
-        result = await createDirectories('myfolder', baseDir, pipeline);
+        result = await Prepare.createDirectories('myfolder', baseDir, pipeline);
 
         const newBaseDir = path.resolve("work", process.env.__OW_ACTIVATION_ID, "myfolder"); // base directory without folder name
         assert.strictEqual(result.base, newBaseDir);
@@ -128,7 +128,7 @@ describe('prepare.js', () => {
         assert.ok(existence, "test setup failed - base directory does not exist");
         existence = false;
 
-        const result = await createDirectories(folderName);
+        const result = await Prepare.createDirectories(folderName);
         assert.ok(result.base.includes(baseDir));
 
         // check directories were created
@@ -155,7 +155,7 @@ describe('prepare.js', () => {
         existence = false;
 
         const pipeline = false;
-        const result = await createDirectories(folderName, '', pipeline);
+        const result = await Prepare.createDirectories(folderName, '', pipeline);
         assert.ok(result.base.includes(baseDir));
         assert.strictEqual(result.in, path.resolve(baseDir, "in"));
         assert.strictEqual(result.out, path.resolve(baseDir, "out"));
@@ -194,7 +194,7 @@ describe('prepare.js', () => {
             base: baseDir
         };
         const directories = [transformerDir];
-        const res = await cleanupDirectories(directories);
+        const res = await Prepare.cleanupDirectories(directories);
         assert.strictEqual(res, true);
 
         existence = await fse.pathExists(baseDir);
@@ -229,7 +229,7 @@ describe('prepare.js', () => {
             base: baseDir
         };
         const directories = [transformerDir];
-        const res = await cleanupDirectories(directories);
+        const res = await Prepare.cleanupDirectories(directories);
         assert.strictEqual(res, true);
 
         existence = await fse.pathExists(baseDir);
@@ -251,7 +251,7 @@ describe('prepare.js', () => {
 
         // make sure directories DO NOT exist
         const directories = [];
-        const res = await cleanupDirectories(directories);
+        const res = await Prepare.cleanupDirectories(directories);
         assert.strictEqual(res, true);
 
         let existence = await fse.pathExists(baseDir);
@@ -273,7 +273,7 @@ describe('prepare.js', () => {
 
         // make sure directories DO NOT exist
         const directories = [null];
-        const res = await cleanupDirectories(directories);
+        const res = await Prepare.cleanupDirectories(directories);
         assert.strictEqual(res, true);
 
         let existence = await fse.pathExists(baseDir);
@@ -295,7 +295,7 @@ describe('prepare.js', () => {
 
         // make sure directories DO NOT exist
         const directories = null;
-        const res = await cleanupDirectories(directories);
+        const res = await Prepare.cleanupDirectories(directories);
         assert.strictEqual(res, true);
 
         let existence = await fse.pathExists(baseDir);
@@ -355,7 +355,7 @@ describe('prepare.js', () => {
             base: baseDir
         };
         const directories = [transformerDir];
-        const res = await cleanupDirectories(directories);
+        const res = await Prepare.cleanupDirectories(directories);
         assert.strictEqual(res, true);
 
         // items under baseDir should be cleaned
@@ -391,7 +391,7 @@ describe('prepare.js', () => {
     it("fails when trying to remove directories", async () => {
         const stub = sinon.stub(fse, 'remove').rejects("reject to trigger error");
 
-        const res = await cleanupDirectories({
+        const res = await Prepare.cleanupDirectories({
             base: '/dev/null'
         });
 
@@ -401,13 +401,13 @@ describe('prepare.js', () => {
     });
 
     it('creates transformers directories and cleans them', async () => {
-        const baseDir = createBaseDirectory();
+        const baseDir = Prepare.createBaseDirectory();
         const directories = [];
-        const T1 = await createDirectories('transformer1', baseDir);
-        const T2 = await createDirectories('transformer2', baseDir);
+        const T1 = await Prepare.createDirectories('transformer1', baseDir);
+        const T2 = await Prepare.createDirectories('transformer2', baseDir);
         directories.push(T1, T2);
 
-        const res = await cleanupDirectories(directories);
+        const res = await Prepare.cleanupDirectories(directories);
         assert.strictEqual(res, true);
 
         let existence = await fse.pathExists(T1.base);
@@ -423,13 +423,13 @@ describe('prepare.js', () => {
         await fse.remove(baseDir);
     });
     it('creates transformers directories and cleans them -- final rendition does not exist', async () => {
-        const baseDir = createBaseDirectory();
+        const baseDir = Prepare.createBaseDirectory();
         const directories = [];
-        const T1 = await createDirectories('transformer1', baseDir);
-        const T2 = await createDirectories('transformer2', baseDir);
+        const T1 = await Prepare.createDirectories('transformer1', baseDir);
+        const T2 = await Prepare.createDirectories('transformer2', baseDir);
         directories.push(T1, T2);
 
-        const res = await cleanupDirectories(directories, 'hello.txt');
+        const res = await Prepare.cleanupDirectories(directories, 'hello.txt');
         assert.strictEqual(res, true);
 
         let existence = await fse.pathExists(T1.base);

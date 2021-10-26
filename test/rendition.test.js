@@ -21,7 +21,7 @@ const mockFs = require('mock-fs');
 const fs = require('fs-extra');
 const { GenericError } = require('@adobe/asset-compute-commons');
 
-const Rendition = require('../lib/rendition');
+const { Rendition } = require('../lib/rendition');
 const filePath = "test/files/file.png";
 const PNG_CONTENTS = fs.readFileSync(filePath);
 const PNG_SIZE = fs.statSync(filePath).size;
