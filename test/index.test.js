@@ -60,7 +60,7 @@ describe("Test export index.js", function() {
 
     it("should export all API", function() {
         const pipeline = require("../index");
-        assert.strictEqual(typeof pipeline.Action, "object");
+        assert.strictEqual(typeof pipeline.Action, "function");
         assert.strictEqual(typeof pipeline.Asset, "function");
         assert.strictEqual(typeof pipeline.Prepare, "function");
         assert.strictEqual(typeof pipeline.Rendition, "function");
