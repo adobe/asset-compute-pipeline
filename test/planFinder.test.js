@@ -572,7 +572,8 @@ describe("E2E tests with Pipeline Engine", function() {
         pipeline.registerTransformer(new TransformerGIF());
 
         const input = {
-            type: 'image/tiff'
+            type: 'image/tiff',
+            path: '/tmp/input'
         };
         const output = {
             type: 'image/png'
@@ -598,7 +599,8 @@ describe("E2E tests with Pipeline Engine", function() {
         pipeline.registerTransformer(new TransformerGIF());
 
         const input = {
-            type: 'image/tiff'
+            type: 'image/tiff',
+            path: '/tmp/input'
         };
         const output = {
             type: 'image/gif'
@@ -614,7 +616,8 @@ describe("E2E tests with Pipeline Engine", function() {
                 type: 'image/png'
             },
             input: {
-                type: 'image/tiff'
+                type: 'image/tiff',
+                path: '/tmp/input'
             }
         }, {
             name: "transformerGIF",
@@ -635,7 +638,8 @@ describe("E2E tests with Pipeline Engine", function() {
         const input = {
             type: 'image/gif',
             width: 500,
-            height: 500
+            height: 500,
+            path: '/tmp/input'
         };
         const output = {
             type: 'machine-json'
@@ -650,7 +654,8 @@ describe("E2E tests with Pipeline Engine", function() {
                 type: 'image/gif',
                 width: 500,
                 height: 500,
-                sourceType: 'LOCAL'
+                sourceType: 'LOCAL',
+                path: '/tmp/input'
             },
             output: {
                 type: 'image/png',
@@ -679,7 +684,8 @@ describe("E2E tests with Pipeline Engine", function() {
         const input = {
             type: 'image/jpeg',
             width: 500,
-            height: 500
+            height: 500,
+            path: '/tmp/input'
         };
         const output = {
             type: 'machine-json'
@@ -694,7 +700,8 @@ describe("E2E tests with Pipeline Engine", function() {
                 type: 'image/jpeg',
                 width: 500,
                 height: 500,
-                sourceType: 'LOCAL'
+                sourceType: 'LOCAL',
+                path: '/tmp/input'
             },
             output: {
                 type: 'image/jpeg',
@@ -723,7 +730,8 @@ describe("E2E tests with Pipeline Engine", function() {
         const input = {
             type: 'image/png',
             width: 500,
-            height: 500
+            height: 500,
+            path: '/tmp/input'
         };
         const output = {
             type: 'machine-json'
@@ -738,7 +746,8 @@ describe("E2E tests with Pipeline Engine", function() {
                 type: 'image/png',
                 width: 500,
                 height: 500,
-                sourceType: 'LOCAL'
+                sourceType: 'LOCAL',
+                path: '/tmp/input'
             },
             output: {
                 type: 'image/png',
@@ -767,7 +776,8 @@ describe("E2E tests with Pipeline Engine", function() {
         const input = {
             type: 'image/png',
             width: 200,
-            height: 200
+            height: 200,
+            path: '/tmp/input'
         };
         const output = {
             type: 'machine-json'
@@ -782,7 +792,8 @@ describe("E2E tests with Pipeline Engine", function() {
                 type: 'image/png',
                 width: 200,
                 height: 200,
-                sourceType: 'URL'
+                sourceType: 'URL',
+                path: '/tmp/input'
             },
             output: {
                 type: 'machine-json'
@@ -798,7 +809,8 @@ describe("E2E tests with Pipeline Engine", function() {
         const input = {
             type: 'image/gif',
             width: 200,
-            height: 200
+            height: 200,
+            path: '/tmp/input'
         };
         const output = {
             type: 'machine-json',
@@ -816,7 +828,8 @@ describe("E2E tests with Pipeline Engine", function() {
                 type: 'image/gif',
                 width: 200,
                 height: 200,
-                sourceType: 'LOCAL'
+                sourceType: 'LOCAL',
+                path: '/tmp/input'
             },
             output: {
                 type: 'image/png',
