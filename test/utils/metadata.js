@@ -17,3 +17,13 @@
 
 const { Metadata } = require('../../lib/utils');
 const assert = require('assert');
+const mockFs = require('mock-fs');
+
+describe("metadata.js", () => {
+  beforeEach(() => {
+    mockFs();
+  });
+  afterEach(() => {
+    mockFs.restore();
+  });
+})
