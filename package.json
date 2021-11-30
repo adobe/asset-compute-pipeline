@@ -56,6 +56,7 @@
     "gm": "^1.23.1",
     "graph-data-structure": "^1.15.0",
     "image-size": "^1.0.0",
+    "mime": "^3.0.0",
     "mime-types": "^2.1.33",
     "util": "^0.12.4",
     "valid-data-url": "^4.0.0"
