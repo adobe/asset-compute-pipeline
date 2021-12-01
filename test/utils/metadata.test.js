@@ -201,7 +201,7 @@ describe("metadata.js", () => {
                 msg: `Image source must contain 'path' field for retrieving metadata`
             }
         }].forEach(t => {
-            it.only(t.name, async () => {
+            it(t.name, async () => {
                 let errorOccur = false;
                 let assetMetadata;
                 try {
