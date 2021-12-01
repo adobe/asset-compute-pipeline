@@ -17,13 +17,88 @@
 
 const { Metadata } = require('../../lib/utils');
 const assert = require('assert');
-const mockFs = require('mock-fs');
 
 describe("metadata.js", () => {
-  beforeEach(() => {
-    mockFs();
-  });
-  afterEach(() => {
-    mockFs.restore();
-  });
-})
+    const extractTests = [{
+        name: 'extracts jpg metadata',
+        input: {
+            name: 'file.jpg',
+            path: 'test/files/file.jpg'
+        },
+        output: {
+            SourceFile: 'test/files/file.jpg',
+            Orientation: 1,
+            FileType: 'JPEG',
+            ImageHeight: 288,
+            ImageWidth: 512,
+            JPEGQualityEstimate: 99
+        }
+    }, {
+        name: 'extracts bmp metadata',
+        input: {
+            name: 'file.bmp',
+            path: 'test/files/file.bmp'
+        },
+        output: {
+            SourceFile: 'test/files/file.bmp',
+            FileType: 'BMP',
+            ImageHeight: 288,
+            ImageWidth: 512,
+        }
+    }, {
+        name: 'extracts gif metadata',
+        input: {
+            name: 'file.gif',
+            path: 'test/files/file.gif'
+        },
+        output: {
+            SourceFile: 'test/files/file.gif',
+            FileType: 'GIF',
+            ImageHeight: 288,
+            ImageWidth: 512,
+        }
+    }, {
+        name: 'extracts png metadata',
+        input: {
+            name: 'file.png',
+            path: 'test/files/file.png'
+        },
+        output: {
+            SourceFile: 'test/files/file.png',
+            FileType: 'PNG',
+            ImageHeight: 288,
+            ImageWidth: 512,
+        }
+    }, {
+        name: 'extracts tif metadata',
+        input: {
+            name: 'file.tif',
+            path: 'test/files/file.tif'
+        },
+        output: {
+            SourceFile: 'test/files/file.tif',
+            Orientation: 1,
+            FileType: 'TIFF',
+            ImageHeight: 288,
+            ImageWidth: 512,
+        }
+    }, {
+        name: 'extracts txt metadata',
+        input: {
+            name: 'file.txt',
+            path: 'test/files/file.txt'
+        },
+        output: {
+            SourceFile: 'test/files/file.txt',
+            FileType: 'TXT'
+        }
+    }];
+    
+    extractTests.forEach(t => {
+        it(t.name, async () => {
+            const assetMetadata = new Metadata(t.input);
+            await assetMetadata.extract();
+            assert.deepStrictEqual(assetMetadata.metadata, t.output);
+        });
+    });
+});

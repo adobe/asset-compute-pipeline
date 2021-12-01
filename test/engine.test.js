@@ -426,9 +426,13 @@ describe("Pipeline Engine tests", function () {
             {
                 name: 'failureTransformer',
                 input: {
-                    name: 'red_dot_alpha0.5.png',
                     type: 'image/png',
-                    path: './test/files/red_dot_alpha0.5.png'
+                    path: './test/files/red_dot_alpha0.5.png',
+                    name: 'red_dot_alpha0.5.png',
+                    SourceFile: './test/files/red_dot_alpha0.5.png',
+                    FileType: 'PNG',
+                    ImageHeight: 10,
+                    ImageWidth: 10
                 },
                 output: { 
                     type: 'image/tiff',
