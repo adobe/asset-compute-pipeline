@@ -20,20 +20,12 @@ jobs:
 
     steps:
     - uses: actions/checkout@v2
+    - name: Setup unit test environment
+      run: sudo apt-get install librsvg2-bin imagemagick exiftool
     - name: Use Node.js ${{ matrix.node-version }}
       uses: actions/setup-node@v1
       with:
         node-version: ${{ matrix.node-version }}
-    - name: test
-      run: |-
-        cat <<EOT > Dockerfile
-        FROM node:${{ matrix.node-version }}
-        WORKDIR /nui
-        COPY . .
-        RUN npm ci
-        RUN npm test
-        EOT
-        docker build .
     - run: npm ci
     - run: npm test
 
