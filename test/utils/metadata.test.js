@@ -22,13 +22,23 @@ const { Reason } = require('@adobe/asset-compute-commons');
 describe("metadata.js", () => {
     context('extract tests', () => {
         [{
+            name: 'extracts bmp metadata',
+            input: {
+                name: 'file.bmp',
+                path: 'test/files/file.bmp'
+            },
+            output: {
+                FileType: 'BMP',
+                ImageHeight: 288,
+                ImageWidth: 512,
+            }
+        }, {
             name: 'extracts jpg metadata',
             input: {
                 name: 'file.jpg',
                 path: 'test/files/file.jpg'
             },
             output: {
-                SourceFile: 'test/files/file.jpg',
                 Orientation: 1,
                 FileType: 'JPEG',
                 ImageHeight: 288,
@@ -42,7 +52,6 @@ describe("metadata.js", () => {
                 path: 'test/files/file.bmp'
             },
             output: {
-                SourceFile: 'test/files/file.bmp',
                 FileType: 'BMP',
                 ImageHeight: 288,
                 ImageWidth: 512,
@@ -54,7 +63,6 @@ describe("metadata.js", () => {
                 path: 'test/files/file.gif'
             },
             output: {
-                SourceFile: 'test/files/file.gif',
                 FileType: 'GIF',
                 ImageHeight: 288,
                 ImageWidth: 512,
@@ -66,7 +74,6 @@ describe("metadata.js", () => {
                 path: 'test/files/file.png'
             },
             output: {
-                SourceFile: 'test/files/file.png',
                 FileType: 'PNG',
                 ImageHeight: 288,
                 ImageWidth: 512,
@@ -78,7 +85,6 @@ describe("metadata.js", () => {
                 path: 'test/files/file.tif'
             },
             output: {
-                SourceFile: 'test/files/file.tif',
                 Orientation: 1,
                 FileType: 'TIFF',
                 ImageHeight: 288,
@@ -91,29 +97,134 @@ describe("metadata.js", () => {
                 path: 'test/files/file.txt'
             },
             output: {
-                SourceFile: 'test/files/file.txt',
                 FileType: 'TXT'
+            }
+        }, {
+            name: 'extracts sgi metadata (imagemagick)',
+            input: {
+                name: 'file.sgi',
+                path: 'test/files/file.sgi'
+            },
+            output: {
+                FileType: 'SGI',
+                ImageHeight: 288,
+                ImageWidth: 512,
+                JPEGQualityEstimate: undefined,
+                Orientation: 'Undefined'
+            }
+        }, {
+            name: 'extracts avi metadata',
+            input: {
+                name: 'file.avi',
+                path: 'test/files/file.avi'
+            },
+            output: {
+                command: "mediainfo",
+                format: "AVI",
+                fileSize: 91662,
+                duration: 2.002,
+                framerate: 29.97,
+                bitrate: 366282,
+                isTruncated: false,
+                videoFormat: "MPEG-4 Visual",
+                videoFormatProfile: "Simple",
+                width: 178,
+                height: 100,
+                aspectRatio: 1.778
+            }
+        }, {
+            name: 'extracts flv metadata',
+            input: {
+                name: 'file.flv',
+                path: 'test/files/file.flv'
+            },
+            output: {
+                command: "mediainfo",
+                format: "Flash Video",
+                fileSize: 110437,
+                duration: 2.032,
+                framerate: 15.25,
+                bitrate: 434791,
+                isTruncated: false,
+                videoFormat: "VP6",
+                videoFormatProfile: undefined,
+                width: 160,
+                height: 120,
+                aspectRatio: 1.333
             }
         }, {
             name: 'extracts mov metadata',
             input: {
-                name: 'file-hd.mov',
-                path: 'test/files/file-hd.mov'
+                name: 'file.mov',
+                path: 'test/files/file.mov'
             },
             output: {
-                "aspectRatio": 1.778,
-                "bitrate": 4806466,
-                "command": "mediainfo",
-                "commandDuration": 61,
-                "duration": 2.002,
-                "fileSize": 1202818,
-                "format": "MPEG-4",
-                "framerate": 29.97,
-                "height": 1080,
-                "isTruncated": false,
-                "videoFormat": "AVC",
-                "videoFormatProfile": "High",
-                "width": 1920
+                command: "mediainfo",
+                format: "MPEG-4",
+                fileSize: 68065,
+                duration: 4.832,
+                framerate: 30,
+                bitrate: 112690,
+                isTruncated: false,
+                videoFormat: "AVC",
+                videoFormatProfile: "Main",
+                width: 192,
+                height: 242,
+                aspectRatio: 0.793
+            }
+        }, {
+            name: 'extracts mp4 metadata',
+            input: {
+                name: 'file.mp4',
+                path: 'test/files/file.mp4'
+            },
+            output: {
+                command: 'mediainfo',
+                format: 'MPEG-4',
+                fileSize: 1055736,
+                duration: 5.312,
+                framerate: 25,
+                bitrate: 1589964,
+                isTruncated: false,
+                videoFormat: 'AVC',
+                videoFormatProfile: 'Main',
+                width: 1280,
+                height: 720,
+                aspectRatio: 1.778
+            }
+        }, {
+            name: 'extracts mpg metadata',
+            input: {
+                name: 'file.mpg',
+                path: 'test/files/file.mpg'
+            },
+            output: {
+                command: "mediainfo",
+                format: "MPEG Video",
+                fileSize: 349900,
+                duration: 4.933,
+                framerate: 30,
+                bitrate: 567444,
+                isTruncated: false,
+                videoFormat: "MPEG Video",
+                videoFormatProfile: undefined,
+                width: 224,
+                height: 256,
+                aspectRatio: 0.875
+            }
+        }, {
+            name: 'extracts wav metadata',
+            input: {
+                name: 'file.wav',
+                path: 'test/files/file.wav'
+            },
+            output: {
+                command: "mediainfo",
+                format: "Wave",
+                fileSize: 28524,
+                duration: 2.583,
+                bitrate: 88344,
+                isTruncated: false
             }
         }].forEach(t => {
             it(t.name, async () => {
