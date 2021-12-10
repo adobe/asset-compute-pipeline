@@ -402,7 +402,7 @@ describe("Pipeline Engine tests", function () {
         assert.strictEqual(result.renditionErrors[0].message,  "Transformer failureTransformer failed: Transformer Failure!");
     });
     it("Runs a pipeline, a transformer fails and userData is in io event", async function () {
-        const pipeline = new Engine();
+        const pipeline = new Engine({ skipMetadataExtraction: true });
         pipeline.registerTransformer(new GoodTransformer());
         pipeline.registerTransformer(new FailureTransformer());
 
@@ -428,11 +428,7 @@ describe("Pipeline Engine tests", function () {
                 input: {
                     type: 'image/png',
                     path: './test/files/red_dot_alpha0.5.png',
-                    name: 'red_dot_alpha0.5.png',
-                    SourceFile: './test/files/red_dot_alpha0.5.png',
-                    FileType: 'PNG',
-                    ImageHeight: 10,
-                    ImageWidth: 10
+                    name: 'red_dot_alpha0.5.png'
                 },
                 output: { 
                     type: 'image/tiff',
