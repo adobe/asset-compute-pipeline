@@ -330,8 +330,7 @@ describe("Pipeline Engine tests", function () {
 
         const input = {
             type: 'image/tiff',
-            path: './test/files/red_dot_alpha0.5.png',
-            name: 'red_dot_alpha0.5.png'
+            path: './test/files/red_dot_alpha0.5.png'
         };
         const output = {
             type: 'image/gif'
@@ -355,8 +354,7 @@ describe("Pipeline Engine tests", function () {
 
         const input = {
             type: 'image/tiff',
-            path: './test/files/red_dot_alpha0.5.png',
-            name: 'red_dot_alpha0.5.png'
+            path: './test/files/red_dot_alpha0.5.png'
         };
         const output = {
             type: 'image/gif'
@@ -410,8 +408,7 @@ describe("Pipeline Engine tests", function () {
         const plan = new Plan();
         const input = {
             type: 'image/png',
-            path: './test/files/red_dot_alpha0.5.png',
-            name: 'red_dot_alpha0.5.png'
+            path: './test/files/red_dot_alpha0.5.png'
         };
         const output = {
             type: "image/jpeg",
@@ -427,8 +424,7 @@ describe("Pipeline Engine tests", function () {
                 name: 'failureTransformer',
                 input: {
                     type: 'image/png',
-                    path: './test/files/red_dot_alpha0.5.png',
-                    name: 'red_dot_alpha0.5.png'
+                    path: './test/files/red_dot_alpha0.5.png'
                 },
                 output: { 
                     type: 'image/tiff',
@@ -557,8 +553,7 @@ describe("Pipeline Engine tests", function () {
 
         const originalInput = {
             type: 'image/tiff',
-            path: './test/files/red_dot_alpha0.5.png',
-            name: 'red_dot_alpha0.5.png'
+            path: './test/files/red_dot_alpha0.5.png'
         };
         const output = {
             type: 'image/gif'

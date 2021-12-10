@@ -249,11 +249,11 @@ describe("metadata.js", () => {
                 msg: 'No source provided'
             }
         }, {
-            name: 'no name and mimetype (cannot get extension)',
+            name: 'no name, path, mimetype (cannot get extension)',
             input: {},
             expectedErr: {
                 reason: Reason.GenericError,
-                msg: `Provided source must contain one of 'name' and 'mimetype' fields`
+                msg: `Provided source must contain one of 'name', 'path', or 'mimetype' fields`
             }
         }, {
             name: 'fail to get extension using only name without extension',

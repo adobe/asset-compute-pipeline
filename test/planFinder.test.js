@@ -643,9 +643,7 @@ describe("E2E tests with Pipeline Engine", function () {
         const input = {
             type: 'image/gif',
             width: 500,
-            height: 500,
-            path: '/tmp/input',
-            name: 'input.png'
+            height: 500
         };
         const output = {
             type: 'machine-json'
@@ -660,9 +658,7 @@ describe("E2E tests with Pipeline Engine", function () {
                 type: 'image/gif',
                 width: 500,
                 height: 500,
-                sourceType: 'LOCAL',
-                path: '/tmp/input',
-                name: 'input.png'
+                sourceType: 'LOCAL'
             },
             output: {
                 type: 'image/png',
@@ -691,9 +687,7 @@ describe("E2E tests with Pipeline Engine", function () {
         const input = {
             type: 'image/jpeg',
             width: 500,
-            height: 500,
-            path: '/tmp/input',
-            name: 'input.png'
+            height: 500
         };
         const output = {
             type: 'machine-json'
@@ -708,9 +702,7 @@ describe("E2E tests with Pipeline Engine", function () {
                 type: 'image/jpeg',
                 width: 500,
                 height: 500,
-                sourceType: 'LOCAL',
-                path: '/tmp/input',
-                name: 'input.png'
+                sourceType: 'LOCAL'
             },
             output: {
                 type: 'image/jpeg',
@@ -739,9 +731,7 @@ describe("E2E tests with Pipeline Engine", function () {
         const input = {
             type: 'image/png',
             width: 500,
-            height: 500,
-            path: '/tmp/input.png',
-            name: 'input.png'
+            height: 500
         };
         const output = {
             type: 'machine-json'
@@ -756,9 +746,7 @@ describe("E2E tests with Pipeline Engine", function () {
                 type: 'image/png',
                 width: 500,
                 height: 500,
-                sourceType: 'LOCAL',
-                path: '/tmp/input.png',
-                name: 'input.png'
+                sourceType: 'LOCAL'
             },
             output: {
                 type: 'image/png',
@@ -787,9 +775,7 @@ describe("E2E tests with Pipeline Engine", function () {
         const input = {
             type: 'image/png',
             width: 200,
-            height: 200,
-            path: '/tmp/input',
-            name: 'input.png'
+            height: 200
         };
         const output = {
             type: 'machine-json'
@@ -804,9 +790,7 @@ describe("E2E tests with Pipeline Engine", function () {
                 type: 'image/png',
                 width: 200,
                 height: 200,
-                sourceType: 'URL',
-                path: '/tmp/input',
-                name: 'input.png'
+                sourceType: 'URL'
             },
             output: {
                 type: 'machine-json'
@@ -822,9 +806,7 @@ describe("E2E tests with Pipeline Engine", function () {
         const input = {
             type: 'image/gif',
             width: 200,
-            height: 200,
-            path: '/tmp/input',
-            name: 'input.png'
+            height: 200
         };
         const output = {
             type: 'machine-json',
@@ -842,9 +824,7 @@ describe("E2E tests with Pipeline Engine", function () {
                 type: 'image/gif',
                 width: 200,
                 height: 200,
-                sourceType: 'LOCAL',
-                path: '/tmp/input',
-                name: 'input.png'
+                sourceType: 'LOCAL'
             },
             output: {
                 type: 'image/png',
