@@ -868,6 +868,28 @@ describe("E2E tests with Pipeline Engine", function () {
             assert.strictEqual(error.message, "No valid plan found.");
         }
     });
+
+    it("Throws error if asset does not exist (metadata extraction is enabled)", async function() {
+        const pipeline = new Engine();
+
+        pipeline.registerTransformer(new TransformerPNG());
+
+        const input = {
+            type: 'image/png',
+            path: '/tmp/input.png',
+            name: 'input.png'
+        };
+        const output = {
+            type: 'image/png'
+        };
+
+        const plan = new Plan();
+        try {
+            await pipeline.refinePlan(plan, input, output);
+        } catch (error) {
+            assert.ok(error.toString().includes('Reading metadata from rendition failed'), `error message should include 'Reading metadata from rendition failed' but get '${error.toString()}''`);
+        }
+    });
 });
 
 

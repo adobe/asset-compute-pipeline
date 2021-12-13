@@ -322,7 +322,7 @@ describe("metadata.js", () => {
                     }
                 } catch (e) {
                     errorOccur = true;
-                    assert.ok(e.toString().includes(currentTest.expectedErr.msg), `error message  "${currentTest.expectedErr.msg}"" but get "${e}""`);
+                    assert.ok(e.toString().includes(currentTest.expectedErr.msg), `error message should include "${currentTest.expectedErr.msg}"" but get "${e}""`);
                     assert.deepStrictEqual(e.name, currentTest.expectedErr.reason);
                 }
 
