@@ -21,7 +21,16 @@ jobs:
     steps:
     - uses: actions/checkout@v2
     - name: Setup unit test environment
-      run: sudo apt-get install librsvg2-bin imagemagick exiftool
+      run: |-
+        sudo apt-get update -y
+        sudo apt-get install -y libwebp-dev libcairo2-dev libopenjp2-tools exiftool
+        git clone https://github.com/ImageMagick/ImageMagick.git
+        cd ImageMagick && git checkout 7.0.10-34
+        ./configure -with-gcc-arch=core2 --enable-hdri=yes --enable-hugepages --enable-largefile --with-x=no --with-heic=no --with-magick-plus-plus=no --enable-static=no --disable-openmp --disable-opencl --disable-docs --without-perl --with-rsvg=yes --with-fontconfig=yes --with-xml=yes --with-webp=yes
+        make && sudo make install && sudo ldconfig /usr/local/lib
+        cd .. && rm -rf ImageMagick
+        cd /usr/local/lib/ && rm -f *.a
+        identify -version
     - name: Use Node.js ${{ matrix.node-version }}
       uses: actions/setup-node@v1
       with:

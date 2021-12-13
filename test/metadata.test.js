@@ -15,7 +15,7 @@
 
 'use strict';
 
-const { Metadata } = require('../../lib/utils');
+const Metadata = require('../lib/metadata');
 const assert = require('assert');
 const { Reason } = require('@adobe/asset-compute-commons');
 
@@ -226,17 +226,17 @@ describe("metadata.js", () => {
                 bitrate: 88344,
                 isTruncated: false
             }
-        }].forEach(t => {
-            it(t.name, async () => {
-                const assetMetadata = new Metadata(t.input);
+        }].forEach(currentTest => {
+            it(currentTest.name, async () => {
+                const assetMetadata = new Metadata(currentTest.input);
                 await assetMetadata.extract();
                 const metadata = assetMetadata.metadata;
 
                 // exclude command duration from mediainfo
-                delete t.output.commandDuration;
+                delete currentTest.output.commandDuration;
                 delete metadata.commandDuration;
 
-                assert.deepStrictEqual(metadata, t.output);
+                assert.deepStrictEqual(metadata, currentTest.output);
             });
         });
     });
@@ -291,7 +291,7 @@ describe("metadata.js", () => {
             runExtract: true,
             expectedErr: {
                 reason: Reason.GenericError,
-                msg: `Image source must contain either 'url' or 'path' field for retrieving metadata`
+                msg: `Image source must contain either 'url' or 'path' field to retrieve metadata`
             }
         }, {
             name: 'valid image asset',
@@ -309,27 +309,27 @@ describe("metadata.js", () => {
             runExtract: true,
             expectedErr: {
                 reason: Reason.GenericError,
-                msg: `Image source must contain 'path' field for retrieving metadata`
+                msg: `Image source must contain 'path' field to retrieve metadata`
             }
-        }].forEach(t => {
-            it(t.name, async () => {
+        }].forEach(currentTest => {
+            it(currentTest.name, async () => {
                 let errorOccur = false;
                 let assetMetadata;
                 try {
-                    assetMetadata = new Metadata(t.input);
-                    if (t.runExtract) {
+                    assetMetadata = new Metadata(currentTest.input);
+                    if (currentTest.runExtract) {
                         await assetMetadata.extract();
                     }
                 } catch (e) {
                     errorOccur = true;
-                    assert.ok(e.toString().includes(t.expectedErr.msg), `error message should includes "${t.expectedErr.msg}"" but get "${e}""`);
-                    assert.deepStrictEqual(e.name, t.expectedErr.reason);
+                    assert.ok(e.toString().includes(currentTest.expectedErr.msg), `error message  "${currentTest.expectedErr.msg}"" but get "${e}""`);
+                    assert.deepStrictEqual(e.name, currentTest.expectedErr.reason);
                 }
 
-                if (!t.expectedErr) {
+                if (!currentTest.expectedErr) {
                     assert.ok(assetMetadata.metadata, 'Metadata should exist');
                 } else if (!errorOccur) {
-                    assert.fail(`Should have failed with error ${t.expectedErr.reason}: "${t.expectedErr.msg}"`);
+                    assert.fail(`Should have failed with error ${currentTest.expectedErr.reason}: "${currentTest.expectedErr.msg}"`);
                 }
             });
             
