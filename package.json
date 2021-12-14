@@ -2,7 +2,7 @@
   "name": "@adobe/asset-compute-pipeline",
   "description": "Asset Compute Pipeline Library",
   "license": "Apache-2.0",
-  "version": "5.0.3",
+  "version": "6.0.0",
   "author": {
     "name": "Adobe Inc."
   },
