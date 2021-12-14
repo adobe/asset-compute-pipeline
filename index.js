@@ -22,6 +22,7 @@ const Transformer = require("./lib/transformer");
 const { Plan } = require("./lib/plan");
 const Engine = require("./lib/engine");
 const Manifest = require("./lib/manifest");
+const Metadata = require("./lib/metadata");
 
 module.exports = {
     Action,
@@ -36,5 +37,6 @@ module.exports = {
     Transformer,
     Plan,
     Engine,
-    Manifest
+    Manifest,
+    Metadata
 };

@@ -384,7 +384,8 @@ describe("Pipeline Engine tests", function () {
         const attributes = {
             input: {
                 type: 'image/png',
-                path: './test/files/red_dot_alpha0.5.png'
+                path: './test/files/red_dot_alpha0.5.png',
+                name: 'red_dot_alpha0.5.png'
             },
             output: {
                 type: "image/png"
@@ -399,7 +400,7 @@ describe("Pipeline Engine tests", function () {
         assert.strictEqual(result.renditionErrors[0].message,  "Transformer failureTransformer failed: Transformer Failure!");
     });
     it("Runs a pipeline, a transformer fails and userData is in io event", async function () {
-        const pipeline = new Engine();
+        const pipeline = new Engine({ skipMetadataExtraction: true });
         pipeline.registerTransformer(new GoodTransformer());
         pipeline.registerTransformer(new FailureTransformer());
 
@@ -421,7 +422,10 @@ describe("Pipeline Engine tests", function () {
         assertPlan(plan, '[start] -> { failureTransformer -> goodTransformer* }', [
             {
                 name: 'failureTransformer',
-                input: { type: 'image/png', path: './test/files/red_dot_alpha0.5.png' },
+                input: {
+                    type: 'image/png',
+                    path: './test/files/red_dot_alpha0.5.png'
+                },
                 output: { 
                     type: 'image/tiff',
                     userData: {

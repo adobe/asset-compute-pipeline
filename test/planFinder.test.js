@@ -564,15 +564,19 @@ describe("PlanFinder tests - using dummy transformers", function() {
 });
 
 // Note: these tests should move to engine.test.js
-describe("E2E tests with Pipeline Engine", function() {
+describe("E2E tests with Pipeline Engine", function () {
+    const params = { skipMetadataExtraction: true };
+
     it("Runs a pipeline with one transformer and one refines the plan", async function() {
-        const pipeline = new Engine();
+        const pipeline = new Engine(params);
 
         pipeline.registerTransformer(new TransformerPNG());
         pipeline.registerTransformer(new TransformerGIF());
 
         const input = {
-            type: 'image/tiff'
+            type: 'image/tiff',
+            path: '/tmp/input.png',
+            name: 'input.png'
         };
         const output = {
             type: 'image/png'
@@ -592,13 +596,15 @@ describe("E2E tests with Pipeline Engine", function() {
     });
 
     it("Runs a pipeline with one transformer and refines the plan with two more transformers", async function() {
-        const pipeline = new Engine();
+        const pipeline = new Engine(params);
 
         pipeline.registerTransformer(new TransformerPNG());
         pipeline.registerTransformer(new TransformerGIF());
 
         const input = {
-            type: 'image/tiff'
+            type: 'image/tiff',
+            path: '/tmp/input',
+            name: 'input.png'
         };
         const output = {
             type: 'image/gif'
@@ -614,7 +620,9 @@ describe("E2E tests with Pipeline Engine", function() {
                 type: 'image/png'
             },
             input: {
-                type: 'image/tiff'
+                type: 'image/tiff',
+                path: '/tmp/input',
+                name: 'input.png'
             }
         }, {
             name: "transformerGIF",
@@ -627,7 +635,7 @@ describe("E2E tests with Pipeline Engine", function() {
         }]);
     });
     it("Runs a pipeline mimicking the sensei use case - sensei doesn't support gif", async function() {
-        const pipeline = new Engine();
+        const pipeline = new Engine(params);
 
         pipeline.registerTransformer(new TransformerImage());
         pipeline.registerTransformer(new TransformerSensei());
@@ -671,7 +679,7 @@ describe("E2E tests with Pipeline Engine", function() {
         }]);
     });
     it("Runs a pipeline mimicking the sensei use case - don't convert to png if source is jpeg", async function() {
-        const pipeline = new Engine();
+        const pipeline = new Engine(params);
 
         pipeline.registerTransformer(new TransformerImage());
         pipeline.registerTransformer(new TransformerSensei());
@@ -715,7 +723,7 @@ describe("E2E tests with Pipeline Engine", function() {
         }]);
     });
     it("Runs a pipeline mimicking the sensei use case -- png too large", async function() {
-        const pipeline = new Engine();
+        const pipeline = new Engine(params);
 
         pipeline.registerTransformer(new TransformerImage());
         pipeline.registerTransformer(new TransformerSensei());
@@ -751,7 +759,7 @@ describe("E2E tests with Pipeline Engine", function() {
                 type: 'image/png',
                 width: 319,
                 height: 319,
-                sourceType: 'URL'
+                sourceType: 'URL',
             },
             output: {
                 type: 'machine-json'
@@ -759,7 +767,7 @@ describe("E2E tests with Pipeline Engine", function() {
         }]);
     });
     it("Runs a pipeline mimicking the sensei use case -- no resizing needed", async function() {
-        const pipeline = new Engine();
+        const pipeline = new Engine(params);
 
         pipeline.registerTransformer(new TransformerImage());
         pipeline.registerTransformer(new TransformerSensei());
@@ -790,7 +798,7 @@ describe("E2E tests with Pipeline Engine", function() {
         }]);
     });
     it("Runs a pipeline mimicking the sensei use case -- no upscaling", async function() {
-        const pipeline = new Engine();
+        const pipeline = new Engine(params);
 
         pipeline.registerTransformer(new TransformerImage());
         pipeline.registerTransformer(new TransformerSensei());
@@ -841,7 +849,7 @@ describe("E2E tests with Pipeline Engine", function() {
     });
 
     it("Throws error if no plan refinement does not find matching transformer", async function() {
-        const pipeline = new Engine();
+        const pipeline = new Engine(params);
 
         pipeline.registerTransformer(new TransformerPNG());
         pipeline.registerTransformer(new TransformerGIF());
@@ -858,6 +866,28 @@ describe("E2E tests with Pipeline Engine", function() {
             await pipeline.refinePlan(plan, input, output);
         } catch (error) {
             assert.strictEqual(error.message, "No valid plan found.");
+        }
+    });
+
+    it("Throws error if asset does not exist (metadata extraction is enabled)", async function() {
+        const pipeline = new Engine();
+
+        pipeline.registerTransformer(new TransformerPNG());
+
+        const input = {
+            type: 'image/png',
+            path: '/tmp/input.png',
+            name: 'input.png'
+        };
+        const output = {
+            type: 'image/png'
+        };
+
+        const plan = new Plan();
+        try {
+            await pipeline.refinePlan(plan, input, output);
+        } catch (error) {
+            assert.ok(error.toString().includes('Reading metadata from rendition failed'), `error message should include 'Reading metadata from rendition failed' but get '${error.toString()}''`);
         }
     });
 });
