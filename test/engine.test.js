@@ -29,6 +29,7 @@ const mockRequire = require("mock-require");
 const {Reason, GenericError, RenditionFormatUnsupportedError, RenditionTooLarge, SourceFormatUnsupportedError} = require('@adobe/asset-compute-commons');
 
 const { TemporaryCloudStorage } = require('./storage/mock-temporary-cloud-storage');
+const MockMetadata = require('./mock-metadata');
 const Engine = require("../lib/engine");
 const { Plan } = require("../lib/plan");
 const Transformer = require("../lib/transformer");
@@ -831,5 +832,84 @@ describe("Pipeline Engine tests", function () {
         const result = await pipeline.run(plan);
         assert.ok(result.renditionErrors);
         assert.strictEqual(result.renditionErrors[0].message,  "data:image/a/c;base64,xxx must be a valid https url or datauri");
+    });
+
+    it("Should try to download before refinePlan with input url no source name nor path", async function () {
+        let downloadRan = false;
+        mockRequire('../lib/storage/http', {
+            download() { 
+                downloadRan = true;
+                console.log(`Fake download success`);
+            }
+        });
+        mockRequire('../lib/metadata', MockMetadata);
+        mockRequire.reRequire('../lib/storage');
+        mockRequire.reRequire('../lib/metadata');
+        const Engine = mockRequire.reRequire('../lib/engine');
+        const pipeline = new Engine();
+
+        const goodTransformer = new GoodTransformer();
+        pipeline.registerTransformer(goodTransformer);
+        pipeline.registerTransformer(new BadTransformer());
+
+        const input = {
+            type: 'image/tiff',
+            url: 'https://example.com/fakeEarth.tiff'
+        };
+        const output = {
+            type: 'image/gif'
+        };
+
+        const plan = new Plan();
+        // TODO: should happen inside transformer
+        await pipeline.refinePlan(plan, input, output);
+        assertPlan(plan, "[start] -> { goodTransformer* }", [{
+            name: "goodTransformer",
+            output: output,
+            input: input
+        }]);
+
+        await pipeline.run(plan);
+        assert.ok(downloadRan);
+    });
+
+    it("Should download before refinePlan with input url (refinePlan)", async function () {
+        let downloadRan = false;
+        mockRequire('../lib/storage/http', {
+            download() { 
+                downloadRan = true;
+                console.log(`Fake download success`);
+            }
+        });
+        mockRequire('../lib/metadata', MockMetadata);
+        mockRequire.reRequire('../lib/storage');
+        mockRequire.reRequire('../lib/metadata');
+        const Engine = mockRequire.reRequire('../lib/engine');
+        const pipeline = new Engine();
+
+        const goodTransformer = new GoodTransformer();
+        pipeline.registerTransformer(goodTransformer);
+        pipeline.registerTransformer(new BadTransformer());
+
+        const input = {
+            type: 'image/tiff',
+            url: 'https://example.com/fakeEarth.tiff',
+            name: "fakeEarth.tiff"
+        };
+        const output = {
+            type: 'image/gif'
+        };
+
+        const plan = new Plan();
+        // TODO: should happen inside transformer
+        await pipeline.refinePlan(plan, input, output);
+        assertPlan(plan, "[start] -> { goodTransformer* }", [{
+            name: "goodTransformer",
+            output: output,
+            input: input
+        }]);
+
+        await pipeline.run(plan);
+        assert.ok(downloadRan);
     });
 });
