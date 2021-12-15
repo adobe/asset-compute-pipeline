@@ -249,11 +249,11 @@ describe("metadata.js", () => {
                 msg: 'No source provided'
             }
         }, {
-            name: 'no name, path, mimetype (cannot get extension)',
+            name: 'no name, path, type (cannot get extension)',
             input: {},
             expectedErr: {
                 reason: Reason.GenericError,
-                msg: `Provided source must contain one of 'name', 'path', or 'mimetype' fields`
+                msg: `Provided source must contain one of 'name', 'path', or 'type' fields`
             }
         }, {
             name: 'fail to get extension using only name without extension',
@@ -263,15 +263,15 @@ describe("metadata.js", () => {
                 msg: `Cannot determined asset extension`
             }
         }, {
-            name: 'fail to get extension using only unknown mimetype',
-            input: { mimetype: 'test' },
+            name: 'fail to get extension using only unknown type',
+            input: { type: 'test' },
             expectedErr: {
                 reason: Reason.GenericError,
                 msg: `Cannot determined asset extension`
             }
         }, {
-            name: 'fail to get extension using name without extension and unknown mimetype',
-            input: { name: 'test', mimetype: 'test' },
+            name: 'fail to get extension using name without extension and unknown type',
+            input: { name: 'test', type: 'test' },
             expectedErr: {
                 reason: Reason.GenericError,
                 msg: `Cannot determined asset extension`
