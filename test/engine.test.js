@@ -868,9 +868,8 @@ describe("Pipeline Engine tests", function () {
             output: output,
             input: input
         }]);
-
-        await pipeline.run(plan);
         assert.ok(downloadRan);
+        await pipeline.run(plan);
     });
 
     it("Should download before refinePlan with input url (refinePlan)", async function () {
@@ -908,8 +907,7 @@ describe("Pipeline Engine tests", function () {
             output: output,
             input: input
         }]);
-
-        await pipeline.run(plan);
         assert.ok(downloadRan);
+        await pipeline.run(plan);
     });
 });
