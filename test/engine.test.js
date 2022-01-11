@@ -580,10 +580,11 @@ describe("Pipeline Engine tests", function () {
     });
 
     it("Should generate a presigned url when sourceType is 'URL' with input datauri", async function () {
-        mockRequire('../lib/storage/temporary-cloud-storage', {TemporaryCloudStorage});
-        mockRequire.reRequire('../lib/storage/datauri');
-        mockRequire.reRequire('../lib/storage');
-        const Engine = mockRequire.reRequire('../lib/engine');
+        // full path + *.js needed so mock-require doesn't rely on get-caller-file
+        mockRequire(path.resolve('./lib/storage/temporary-cloud-storage.js'), {TemporaryCloudStorage});
+        mockRequire.reRequire(path.resolve('./lib/storage/datauri.js'));
+        mockRequire.reRequire(path.resolve('./lib/storage/index.js'));
+        const Engine = mockRequire.reRequire(path.resolve('./lib/engine.js'));
 
         const pipeline = new Engine();
         let transformerRan = false;
@@ -615,10 +616,11 @@ describe("Pipeline Engine tests", function () {
     });
 
     it("Should generate a presigned url when sourceType is 'URL' without input url", async function () {
-        mockRequire('../lib/storage/temporary-cloud-storage', {TemporaryCloudStorage});
-        mockRequire.reRequire('../lib/storage/datauri');
-        mockRequire.reRequire('../lib/storage');
-        const Engine = mockRequire.reRequire('../lib/engine');
+        // full path + *.js needed so mock-require doesn't rely on get-caller-file
+        mockRequire(path.resolve('./lib/storage/temporary-cloud-storage.js'), {TemporaryCloudStorage});
+        mockRequire.reRequire(path.resolve('./lib/storage/datauri.js'));
+        mockRequire.reRequire(path.resolve('./lib/storage/index.js'));
+        const Engine = mockRequire.reRequire(path.resolve('./lib/engine.js'));
         const pipeline = new Engine();
 
         let transformerRan = false;
@@ -651,11 +653,11 @@ describe("Pipeline Engine tests", function () {
 
     it("Should download when sourceType is 'LOCAL' with input datauri", async function () {
         let downloadRan = false;
-        mockRequire('../lib/storage/datauri', {
+        mockRequire(path.resolve('./lib/storage/datauri.js'), {
             download() { downloadRan = true; }
         });
-        mockRequire.reRequire('../lib/storage');
-        const Engine = mockRequire.reRequire('../lib/engine');
+        mockRequire.reRequire(path.resolve('./lib/storage/index.js'));
+        const Engine = mockRequire.reRequire(path.resolve('./lib/engine.js'));
         const pipeline = new Engine();
         pipeline.registerTransformer(new Transformer('test'));
 
@@ -678,14 +680,14 @@ describe("Pipeline Engine tests", function () {
     it("Should download when sourceType is 'LOCAL' with input url", async function () {
         let downloadRan = false;
         let transformerRan = false;
-        mockRequire('../lib/storage/http', {
+        mockRequire(path.resolve('./lib/storage/http.js'), {
             download() { 
                 downloadRan = true;
                 console.log(`Fake download success`);
             }
         });
-        mockRequire.reRequire('../lib/storage');
-        const Engine = mockRequire.reRequire('../lib/engine');
+        mockRequire.reRequire(path.resolve('./lib/storage/index.js'));
+        const Engine = mockRequire.reRequire(path.resolve('./lib/engine.js'));
         const pipeline = new Engine();
 
         class TestTransformer extends Transformer {
@@ -736,11 +738,11 @@ describe("Pipeline Engine tests", function () {
     it("Should default to LOCAL when no sourceType provided", async function () {
         let downloadRan = false;
         let transformerRan = false;
-        mockRequire('../lib/storage/http', {
+        mockRequire(path.resolve('./lib/storage/http.js'), {
             download() { downloadRan = true; }
         });
-        mockRequire.reRequire('../lib/storage');
-        const Engine = mockRequire.reRequire('../lib/engine');
+        mockRequire.reRequire(path.resolve('./lib/storage/index.js'));
+        const Engine = mockRequire.reRequire(path.resolve('./lib/engine.js'));
         const pipeline = new Engine();
 
         class TestTransformer extends Transformer {
@@ -768,10 +770,11 @@ describe("Pipeline Engine tests", function () {
     });
 
     it("Should error when invalid path is provided", async function () {
-        mockRequire('../lib/storage/temporary-cloud-storage', {TemporaryCloudStorage});
-        mockRequire.reRequire('../lib/storage/datauri');
-        mockRequire.reRequire('../lib/storage');
-        const Engine = mockRequire.reRequire('../lib/engine');
+        // full path + *.js needed so mock-require doesn't rely on get-caller-file
+        mockRequire(path.resolve('./lib/storage/temporary-cloud-storage.js'), {TemporaryCloudStorage});
+        mockRequire.reRequire(path.resolve('./lib/storage/datauri.js'));
+        mockRequire.reRequire(path.resolve('./lib/storage/index.js'));
+        const Engine = mockRequire.reRequire(path.resolve('./lib/engine.js'));
         const pipeline = new Engine();
         pipeline.registerTransformer(new Transformer('test'));
 
@@ -836,16 +839,16 @@ describe("Pipeline Engine tests", function () {
 
     it("Should try to download before refinePlan with input url no source name nor path", async function () {
         let downloadRan = false;
-        mockRequire('../lib/storage/http', {
+        mockRequire(path.resolve('./lib/storage/http.js'), {
             download() { 
                 downloadRan = true;
                 console.log(`Fake download success`);
             }
         });
-        mockRequire('../lib/metadata', MockMetadata);
-        mockRequire.reRequire('../lib/storage');
-        mockRequire.reRequire('../lib/metadata');
-        const Engine = mockRequire.reRequire('../lib/engine');
+        mockRequire(path.resolve('./lib/metadata.js'), MockMetadata);
+        mockRequire.reRequire(path.resolve('./lib/storage/index.js'));
+        mockRequire.reRequire(path.resolve('./lib/metadata.js'));
+        const Engine = mockRequire.reRequire(path.resolve('./lib/engine.js'));
         const pipeline = new Engine();
 
         const goodTransformer = new GoodTransformer();
@@ -874,16 +877,16 @@ describe("Pipeline Engine tests", function () {
 
     it("Should download before refinePlan with input url (refinePlan)", async function () {
         let downloadRan = false;
-        mockRequire('../lib/storage/http', {
+        mockRequire(path.resolve('./lib/storage/http.js'), {
             download() { 
                 downloadRan = true;
                 console.log(`Fake download success`);
             }
         });
-        mockRequire('../lib/metadata', MockMetadata);
-        mockRequire.reRequire('../lib/storage');
-        mockRequire.reRequire('../lib/metadata');
-        const Engine = mockRequire.reRequire('../lib/engine');
+        mockRequire(path.resolve('./lib/metadata.js'), MockMetadata);
+        mockRequire.reRequire(path.resolve('./lib/storage/index.js'));
+        mockRequire.reRequire(path.resolve('./lib/metadata.js'));
+        const Engine = mockRequire.reRequire(path.resolve('./lib/engine.js'));
         const pipeline = new Engine();
 
         const goodTransformer = new GoodTransformer();

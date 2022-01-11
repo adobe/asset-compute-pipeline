@@ -32,6 +32,8 @@
     "conventional-changelog-eslint": "^3.0.9",
     "dotenv": "^8.2.0",
     "eslint": "^7.32.0",
+    "eslint-plugin-mocha": "^10.0.3",
+    "eslint-plugin-notice": "^0.9.10",
     "license-checker": "^25.0.1",
     "lockfile-lint": "^4.6.2",
     "mocha": "^8.4.0",
