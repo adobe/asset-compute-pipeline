@@ -44,7 +44,9 @@ describe('storage.js', () => {
 
         it('should download simple png and return a new source object', async () => {
             const assetReference = {
-                url: 'https://example.com/photo/elephant.png'
+                url: 'https://example.com/photo/elephant.png',
+                size: 11,
+                type: 'image/png'
             };
             const directory = './in/fakeSource/filePath';
             const name = 'source.png';
@@ -54,7 +56,10 @@ describe('storage.js', () => {
 
             nock('https://example.com')
                 .get('/photo/elephant.png')
-                .reply(200, 'ok');
+                .reply(200,  "hello world", {
+                    'content-type': 'image/png',
+                    'content-length': 11
+                });
 
             const source = await Storage.getAsset(assetReference, directory, name);
 
@@ -66,6 +71,8 @@ describe('storage.js', () => {
         it('should download png and use basic auth headers', async () => {
             const assetReference = {
                 url: 'https://example.com/photo/elephant.png',
+                size: 11,
+                type: 'image/png',
                 headers: {
                     'Authorization': 'Basic base64stringGoesHere'
                 }
@@ -79,7 +86,10 @@ describe('storage.js', () => {
             nock('https://example.com')
                 .get('/photo/elephant.png')
                 .matchHeader('Authorization', 'Basic base64stringGoesHere')
-                .reply(200, 'ok');
+                .reply(200, "hello world", {
+                    'content-type': 'image/png',
+                    'content-length': 11
+                });
 
             const source = await Storage.getAsset(assetReference, directory, name);
 
@@ -91,6 +101,8 @@ describe('storage.js', () => {
         it('should download png and use bearer token auth auth headers', async () => {
             const assetReference = {
                 url: 'https://example.com/photo/elephant.png',
+                size: 11,
+                type: 'image/png',
                 headers: {
                     'Authorization': 'Bearer thereGoesTheToken'
                 }
@@ -104,7 +116,10 @@ describe('storage.js', () => {
             nock('https://example.com')
                 .get('/photo/elephant.png')
                 .matchHeader('Authorization', 'Bearer thereGoesTheToken')
-                .reply(200, 'ok');
+                .reply(200, "hello world", {
+                    'content-type': 'image/png',
+                    'content-length': 11
+                });
 
             const source = await Storage.getAsset(assetReference, directory, name);
 
@@ -251,8 +266,17 @@ describe('storage.js', () => {
             assert.ok(fs.existsSync(directory));
 
             nock('https://example.com')
+                .head('/photo/elephant.png')
+                .reply(200, 'OK', {
+                    'content-type': 'image/png',
+                    'content-length': 11
+                });
+            nock('https://example.com')
                 .get('/photo/elephant.png')
-                .reply(200, 'ok');
+                .reply(200, 'hello world', {
+                    'content-type': 'image/png',
+                    'content-length': 11
+                });
 
             const source = await Storage.getAsset(assetReference, directory, name);
 
@@ -275,7 +299,9 @@ describe('storage.js', () => {
         });
         it('should download simple png and return a new source object', async () => {
             const paramsSource = {
-                url: 'https://example.com/photo/elephant.png'
+                url: 'https://example.com/photo/elephant.png',
+                size: 11,
+                type: 'image/png'
             };
             const inDirectory = './in/fakeSource/filePath';
 
@@ -284,7 +310,10 @@ describe('storage.js', () => {
 
             nock('https://example.com')
                 .get('/photo/elephant.png')
-                .reply(200, 'ok');
+                .reply(200, 'hello world', {
+                    'content-type': 'image/png',
+                    'content-length': 11
+                });
 
             const source = await Storage.getSource(paramsSource, inDirectory);
 
@@ -314,7 +343,9 @@ describe('storage.js', () => {
         it('should fail during download', async () => {
             process.env.ASSET_COMPUTE_DISABLE_RETRIES = true; // disable retries to test upload failure
             const paramsSource = {
-                url: 'https://example.com/photo/elephant.png'
+                url: 'https://example.com/photo/elephant.png',
+                size: 11,
+                type: 'image/png'
             };
             const inDirectory = './in/fakeSource/filePath';
 
@@ -404,7 +435,9 @@ describe('storage.js', () => {
         it('paramsSource has source name, but will still be called `source.png` internally', async () => {
             const paramsSource = {
                 url: 'https://example.com/photo/elephant.png',
-                name: '!@#$%^&*().png'
+                name: '!@#$%^&*().png',
+                size: 11,
+                type: 'image/png'
             };
             const inDirectory = './in/fakeSource/filePath';
 
@@ -413,7 +446,10 @@ describe('storage.js', () => {
 
             nock('https://example.com')
                 .get('/photo/elephant.png')
-                .reply(200, 'ok');
+                .reply(200, 'hello world', {
+                    'content-type': 'image/png',
+                    'content-length': 11
+                });
 
             const source = await Storage.getSource(paramsSource, inDirectory);
 
@@ -425,7 +461,8 @@ describe('storage.js', () => {
         it('paramsSource object will use url over mimeType to determine extension', async () => {
             const paramsSource = {
                 url: 'https://example.com/photo/elephant.png',
-                mimeType: 'image/jpeg'
+                mimeType: 'image/jpeg',
+                size: 11
             };
             const inDirectory = './in/fakeSource/filePath';
 
@@ -434,7 +471,10 @@ describe('storage.js', () => {
 
             nock('https://example.com')
                 .get('/photo/elephant.png')
-                .reply(200, 'ok');
+                .reply(200, 'hello world', {
+                    'content-type': 'image/png',
+                    'content-length': 11
+                });
 
             const source = await Storage.getSource(paramsSource, inDirectory);
 
@@ -447,7 +487,8 @@ describe('storage.js', () => {
             const paramsSource = {
                 url: 'https://example.com/photo/elephant.png',
                 mimeType: 'image/jpeg',
-                name: 'file'
+                name: 'file',
+                size: 11
             };
             const inDirectory = './in/fakeSource/filePath';
 
@@ -456,7 +497,10 @@ describe('storage.js', () => {
 
             nock('https://example.com')
                 .get('/photo/elephant.png')
-                .reply(200, 'ok');
+                .reply(200, 'hello world', {
+                    'content-type': 'image/png',
+                    'content-length': 11
+                });
 
             const source = await Storage.getSource(paramsSource, inDirectory);
 
@@ -469,7 +513,8 @@ describe('storage.js', () => {
             const paramsSource = {
                 url: 'https://example.com/photo/elephant.jpeg',
                 mimeType: 'not a valid mimetype',
-                name: 'file'
+                name: 'file',
+                size: 11
             };
             const inDirectory = './in/fakeSource/filePath';
 
@@ -478,7 +523,10 @@ describe('storage.js', () => {
 
             nock('https://example.com')
                 .get('/photo/elephant.jpeg')
-                .reply(200, 'ok');
+                .reply(200, 'hello world', {
+                    'content-type': 'image/png',
+                    'content-length': 11
+                });
 
             const source = await Storage.getSource(paramsSource, inDirectory);
 
@@ -491,7 +539,8 @@ describe('storage.js', () => {
             const paramsSource = {
                 url: 'https://example.com/photo/elephant.jpeg',
                 mimeType: 'image/jpeg',
-                name: 'file.png'
+                name: 'file.png',
+                size: 11
             };
             const inDirectory = './in/fakeSource/filePath';
 
@@ -500,7 +549,10 @@ describe('storage.js', () => {
 
             nock('https://example.com')
                 .get('/photo/elephant.jpeg')
-                .reply(200, 'ok');
+                .reply(200, 'hello world', {
+                    'content-type': 'image/jpeg',
+                    'content-length': 11
+                });
 
             const source = await Storage.getSource(paramsSource, inDirectory);
 
@@ -516,8 +568,17 @@ describe('storage.js', () => {
             assert.ok(fs.existsSync(inDirectory));
 
             nock('https://example.com')
+                .head('/photo/elephant.png')
+                .reply(200, 'OK', {
+                    'content-type': 'image/png',
+                    'content-length': 11
+                });
+            nock('https://example.com')
                 .get('/photo/elephant.png')
-                .reply(200, 'ok');
+                .reply(200, 'hello world', {
+                    'content-type': 'image/png',
+                    'content-length': 11
+                });
 
             const source = await Storage.getSource(paramsSource, inDirectory);
 
