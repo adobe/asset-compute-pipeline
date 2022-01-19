@@ -25,7 +25,7 @@ const debugConfig = require('debug');
 debugConfig.enable("pipeline:*,test:*");
 const debug = require('debug')('test:engine');
 const nock = require('nock');
-const mockRequire = require("mock-require");
+const proxyquire =  require('proxyquire');
 const {Reason, GenericError, RenditionFormatUnsupportedError, RenditionTooLarge, SourceFormatUnsupportedError} = require('@adobe/asset-compute-commons');
 
 const { TemporaryCloudStorage } = require('./storage/mock-temporary-cloud-storage');
@@ -146,7 +146,6 @@ describe("Pipeline Engine tests", function () {
     });
     afterEach(() => {
         nock.cleanAll();
-        mockRequire.stopAll();
     });
 
     it("Runs a simple pipeline", function () {
@@ -580,11 +579,22 @@ describe("Pipeline Engine tests", function () {
     });
 
     it("Should generate a presigned url when sourceType is 'URL' with input datauri", async function () {
-        mockRequire('../lib/storage/temporary-cloud-storage', {TemporaryCloudStorage});
-        mockRequire.reRequire('../lib/storage/datauri');
-        mockRequire.reRequire('../lib/storage');
-        const Engine = mockRequire.reRequire('../lib/engine');
+        // when no overrides are specified, path.extname behaves normally
 
+        // datauri file is called in multiple places: engine.js and storage/index.js
+        // for this test, it is called in Storage, so we must mock it inside that file
+        const datauri = proxyquire('../lib/storage/datauri', {
+            './temporary-cloud-storage.js':  {TemporaryCloudStorage}
+        });
+        const { Storage } = proxyquire('../lib/storage', {
+            './datauri': datauri
+        });
+        const Engine = proxyquire('../lib/engine', 
+            {
+                './storage': {
+                    Storage
+                }
+            });
         const pipeline = new Engine();
         let transformerRan = false;
         let preparedInputAsset;
@@ -615,10 +625,16 @@ describe("Pipeline Engine tests", function () {
     });
 
     it("Should generate a presigned url when sourceType is 'URL' without input url", async function () {
-        mockRequire('../lib/storage/temporary-cloud-storage', {TemporaryCloudStorage});
-        mockRequire.reRequire('../lib/storage/datauri');
-        mockRequire.reRequire('../lib/storage');
-        const Engine = mockRequire.reRequire('../lib/engine');
+        // datauri file is called in multiple places: engine.js and storage/index.js
+        // for this test, it is called in engine.js directly, so we must mock it there instead of Storage
+        const datauri = proxyquire('../lib/storage/datauri', {
+            './temporary-cloud-storage.js':  {TemporaryCloudStorage}
+        });
+        const Engine = proxyquire('../lib/engine', 
+            {
+                './storage/datauri': datauri
+            });
+
         const pipeline = new Engine();
 
         let transformerRan = false;
@@ -651,11 +667,21 @@ describe("Pipeline Engine tests", function () {
 
     it("Should download when sourceType is 'LOCAL' with input datauri", async function () {
         let downloadRan = false;
-        mockRequire('../lib/storage/datauri', {
-            download() { downloadRan = true; }
+
+        // datauri file is called in multiple places: engine.js and storage/index.js
+        // for this test, it is called via Storage so we much mock it inside storage/index.js
+        const { Storage } = proxyquire('../lib/storage', {
+            './datauri': {
+                download : () => { downloadRan = true; }
+            }
         });
-        mockRequire.reRequire('../lib/storage');
-        const Engine = mockRequire.reRequire('../lib/engine');
+        const Engine = proxyquire('../lib/engine', 
+            {
+                './storage': {
+                    Storage
+                }
+            });
+
         const pipeline = new Engine();
         pipeline.registerTransformer(new Transformer('test'));
 
@@ -678,14 +704,21 @@ describe("Pipeline Engine tests", function () {
     it("Should download when sourceType is 'LOCAL' with input url", async function () {
         let downloadRan = false;
         let transformerRan = false;
-        mockRequire('../lib/storage/http', {
-            download() { 
-                downloadRan = true;
-                console.log(`Fake download success`);
+
+        const { Storage } = proxyquire('../lib/storage', {
+            './http': {
+                download : () => { 
+                    downloadRan = true;
+                    console.log(`Fake download success`);
+                }
             }
         });
-        mockRequire.reRequire('../lib/storage');
-        const Engine = mockRequire.reRequire('../lib/engine');
+        const Engine = proxyquire('../lib/engine', 
+            {
+                './storage': {
+                    Storage
+                }
+            });
         const pipeline = new Engine();
 
         class TestTransformer extends Transformer {
@@ -736,11 +769,17 @@ describe("Pipeline Engine tests", function () {
     it("Should default to LOCAL when no sourceType provided", async function () {
         let downloadRan = false;
         let transformerRan = false;
-        mockRequire('../lib/storage/http', {
-            download() { downloadRan = true; }
+        const { Storage } = proxyquire('../lib/storage', {
+            './http': {
+                download : () => { downloadRan = true; }
+            }
         });
-        mockRequire.reRequire('../lib/storage');
-        const Engine = mockRequire.reRequire('../lib/engine');
+        const Engine = proxyquire('../lib/engine', 
+            {
+                './storage': {
+                    Storage
+                }
+            });
         const pipeline = new Engine();
 
         class TestTransformer extends Transformer {
@@ -768,10 +807,16 @@ describe("Pipeline Engine tests", function () {
     });
 
     it("Should error when invalid path is provided", async function () {
-        mockRequire('../lib/storage/temporary-cloud-storage', {TemporaryCloudStorage});
-        mockRequire.reRequire('../lib/storage/datauri');
-        mockRequire.reRequire('../lib/storage');
-        const Engine = mockRequire.reRequire('../lib/engine');
+        // datauri file is called in multiple places: engine.js and storage/index.js
+        // for this test, it is called in engine.js directly, so we must mock it there instead of Storage
+        const datauri = proxyquire('../lib/storage/datauri', {
+            './temporary-cloud-storage.js':  {TemporaryCloudStorage}
+        });
+        const Engine = proxyquire('../lib/engine', 
+            {
+                './storage/datauri': datauri
+            });
+
         const pipeline = new Engine();
         pipeline.registerTransformer(new Transformer('test'));
 
@@ -835,23 +880,21 @@ describe("Pipeline Engine tests", function () {
     });
 
     it("Should try to download before refinePlan with input url no source name nor path", async function () {
-        let downloadRan = false;
-        mockRequire('../lib/storage/http', {
-            download() { 
-                downloadRan = true;
-                console.log(`Fake download success`);
-            }
-        });
-        mockRequire('../lib/metadata', MockMetadata);
-        mockRequire.reRequire('../lib/storage');
-        mockRequire.reRequire('../lib/metadata');
-        const Engine = mockRequire.reRequire('../lib/engine');
-        const pipeline = new Engine();
+        const Engine = proxyquire('../lib/engine', 
+            {
+                './metadata': MockMetadata
+            });
 
+        nock('https://example.com')
+            .get('/fakeEarth.tiff')
+            .reply(200, "ok");
+        
+        const pipeline = new Engine();
+        
         const goodTransformer = new GoodTransformer();
         pipeline.registerTransformer(goodTransformer);
         pipeline.registerTransformer(new BadTransformer());
-
+        
         const input = {
             type: 'image/tiff',
             url: 'https://example.com/fakeEarth.tiff'
@@ -859,7 +902,7 @@ describe("Pipeline Engine tests", function () {
         const output = {
             type: 'image/gif'
         };
-
+        
         const plan = new Plan();
         // TODO: should happen inside transformer
         await pipeline.refinePlan(plan, input, output);
@@ -868,22 +911,21 @@ describe("Pipeline Engine tests", function () {
             output: output,
             input: input
         }]);
-        assert.ok(downloadRan);
+        // assert download ran
+        assert(nock.isDone());
         await pipeline.run(plan);
     });
 
     it("Should download before refinePlan with input url (refinePlan)", async function () {
-        let downloadRan = false;
-        mockRequire('../lib/storage/http', {
-            download() { 
-                downloadRan = true;
-                console.log(`Fake download success`);
-            }
-        });
-        mockRequire('../lib/metadata', MockMetadata);
-        mockRequire.reRequire('../lib/storage');
-        mockRequire.reRequire('../lib/metadata');
-        const Engine = mockRequire.reRequire('../lib/engine');
+        const Engine = proxyquire('../lib/engine', 
+            {
+                './metadata': MockMetadata
+            });
+
+        nock('https://example.com')
+            .get('/fakeEarth.tiff')
+            .reply(200, "ok");
+
         const pipeline = new Engine();
 
         const goodTransformer = new GoodTransformer();
@@ -907,7 +949,8 @@ describe("Pipeline Engine tests", function () {
             output: output,
             input: input
         }]);
-        assert.ok(downloadRan);
+        // assert download ran
+        assert(nock.isDone());
         await pipeline.run(plan);
     });
 });

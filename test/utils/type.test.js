@@ -17,7 +17,7 @@
 
 const { detectContentType } = require('../../lib/utils');
 const assert = require('assert');
-const mockRequire = require("mock-require");
+const proxyquire = require('proxyquire');
 
 describe("type.js", () => {
     it('detects mimetypes and encodings', async function () {
@@ -68,17 +68,14 @@ describe("type.js", () => {
 
     describe("file tool fallback", () => {
 
-        afterEach(function() {
-            mockRequire.stop("child_process");
-        });
-
         it('provides a fallback if the file command fails', async function () {
-            mockRequire("child_process", {
-                exec: () => {
-                    throw new Error('file command failure simulation');
+            const detectContentType = proxyquire('../../lib/utils/type', {
+                'child_process': {
+                    exec: () => {
+                        throw new Error('file command failure simulation');
+                    }
                 }
             });
-            const detectContentType = mockRequire.reRequire('../../lib/utils/type');
 
             assert.deepStrictEqual(await detectContentType('./test/files/file.jpg'), {
                 mime: "image/jpeg"

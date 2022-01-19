@@ -20,7 +20,7 @@ const mockFs = require("mock-fs");
 const fs = require('fs-extra');
 const { download } = require('../../lib/storage/datauri');
 const { TemporaryCloudStorage } = require('./mock-temporary-cloud-storage');
-const mockRequire = require("mock-require");
+const proxyquire = require('proxyquire');
 const nock = require('nock');
 
 describe('datauri.js', () => {
@@ -75,8 +75,9 @@ describe('datauri.js', () => {
             path: "fakeSuccessFilePath"
         };
         mockFs.restore();
-        mockRequire('../../lib/storage/temporary-cloud-storage', {TemporaryCloudStorage});
-        const datauri = mockRequire.reRequire('../../lib/storage/datauri');
+        const datauri = proxyquire('../../lib/storage/datauri', {
+            './temporary-cloud-storage.js':  {TemporaryCloudStorage}
+        });
         const preSignedUrl = await datauri.getPreSignedUrl(source.path);
         assert.strictEqual(preSignedUrl,`http://storage.com/preSignUrl/${source.path}`);
     });
@@ -88,8 +89,9 @@ describe('datauri.js', () => {
             path: "fakeRetrySuccessFilePath"
         };
         mockFs.restore();
-        mockRequire('../../lib/storage/temporary-cloud-storage', {TemporaryCloudStorage});
-        const datauri = mockRequire.reRequire('../../lib/storage/datauri');
+        const datauri = proxyquire('../../lib/storage/datauri', {
+            './temporary-cloud-storage.js':  {TemporaryCloudStorage}
+        });
         const preSignedUrl = await datauri.getPreSignedUrl(source.path);
         assert.strictEqual(preSignedUrl,`http://storage.com/preSignUrl/${source.path}`);
     });
@@ -101,8 +103,9 @@ describe('datauri.js', () => {
             path: "fakeFailureFilePath"
         };
         mockFs.restore();
-        mockRequire('../../lib/storage/temporary-cloud-storage', {TemporaryCloudStorage});
-        const datauri = mockRequire.reRequire('../../lib/storage/datauri');
+        const datauri = proxyquire('../../lib/storage/datauri', {
+            './temporary-cloud-storage.js':  {TemporaryCloudStorage}
+        });
         try{
             await datauri.getPreSignedUrl(source.path, 0);
         }catch(e){
