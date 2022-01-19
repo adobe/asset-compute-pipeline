@@ -20,7 +20,7 @@ const mockFs = require('mock-fs');
 
 const { Storage } = require('../../lib/storage');
 const nock = require('nock');
-const mockRequire = require("mock-require");
+const proxyquire =  require('proxyquire').noCallThru();
 const fs = require('fs-extra');
 const path = require('path');
 const { GenericError } = require('@adobe/asset-compute-commons');
@@ -37,7 +37,6 @@ describe('storage.js', () => {
         afterEach( () => {
             nock.cleanAll();
             mockFs.restore();
-            mockRequire.stopAll();
             delete process.env.WORKER_TEST_MODE;
             delete process.env.ASSET_COMPUTE_DISABLE_RETRIES;
         });
@@ -156,16 +155,17 @@ describe('storage.js', () => {
             const disableSourceDownload = true;
 
             mockFs.restore();
-            mockRequire('../../lib/storage/datauri', {
-                getPreSignedUrl : (source) => {
-                    console.log('Mocked source : ' + source);
-                    return 'https://example.com/preSignedUrl';
-                },
-                download : () => {
-                    console.log('Fake file downloaded');
+            const { Storage } = proxyquire('../../lib/storage', {
+                './datauri': {
+                    getPreSignedUrl : (source) => {
+                        console.log('Mocked source : ' + source);
+                        return 'https://example.com/preSignedUrl';
+                    },
+                    download : () => {
+                        console.log('Fake file downloaded');
+                    }
                 }
             });
-            const { Storage } = mockRequire.reRequire("../../lib/storage");
             mockFs({'./in/fakeSource/filePath': {}});
             // This is mocked to pass the fileExistsCheck
             fs.writeFileSync('./in/fakeSource/filePath/source','something');
@@ -183,13 +183,16 @@ describe('storage.js', () => {
             };
             
             mockFs.restore();
-            mockRequire('../../lib/storage/datauri', {
-                getPreSignedUrl : (source) => {
-                    console.log('Mocked source : ' + source);
-                    return 'https://example.com/preSignedUrl';
-                },
-                download : () => {
-                    console.log('Fake file downloaded');
+
+            const { Storage } = proxyquire('../../lib/storage', {
+                './datauri': {
+                    getPreSignedUrl : (source) => {
+                        console.log('Mocked source : ' + source);
+                        return 'https://example.com/preSignedUrl';
+                    },
+                    download : () => {
+                        console.log('Fake file downloaded');
+                    }
                 }
             });
             
@@ -197,7 +200,6 @@ describe('storage.js', () => {
             const name = 'source';
             const disableSourceDownload = true;
 
-            const { Storage } = mockRequire.reRequire("../../lib/storage");
             const source = await Storage.getAsset(assetReference, directory, name, disableSourceDownload);
             assert.strictEqual(source.name, 'source');
             assert.strictEqual(source.path, 'in/fakeSource/filePath/source');
@@ -229,13 +231,15 @@ describe('storage.js', () => {
             const name = 'source';
             const disableSourceDownload = true;
             mockFs.restore();
-            mockRequire('../../lib/storage/datauri', {
-                getPreSignedUrl : (source) => {
-                    console.log('Mocked source : ' + source);
-                    return 'https://example.com/preSignedUrl';
-                },
-                download : () => {
-                    console.log('Fake file downloaded');
+            const { Storage } = proxyquire('../../lib/storage', {
+                './datauri': {
+                    getPreSignedUrl : (source) => {
+                        console.log('Mocked source : ' + source);
+                        return 'https://example.com/preSignedUrl';
+                    },
+                    download : () => {
+                        console.log('Fake file downloaded');
+                    }
                 }
             });
             mockFs({ './in/fakeSource/filePath': {} });
