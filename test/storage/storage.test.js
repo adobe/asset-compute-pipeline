@@ -20,7 +20,7 @@ const mockFs = require('mock-fs');
 
 const { Storage } = require('../../lib/storage');
 const nock = require('nock');
-const proxyquire =  require('proxyquire').noCallThru();
+const proxyquire =  require('proxyquire');
 const fs = require('fs-extra');
 const path = require('path');
 const { GenericError } = require('@adobe/asset-compute-commons');

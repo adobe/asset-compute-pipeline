@@ -25,7 +25,7 @@ const debugConfig = require('debug');
 debugConfig.enable("pipeline:*,test:*");
 const debug = require('debug')('test:engine');
 const nock = require('nock');
-const proxyquire =  require('proxyquire').noCallThru();
+const proxyquire =  require('proxyquire');
 const {Reason, GenericError, RenditionFormatUnsupportedError, RenditionTooLarge, SourceFormatUnsupportedError} = require('@adobe/asset-compute-commons');
 
 const { TemporaryCloudStorage } = require('./storage/mock-temporary-cloud-storage');
