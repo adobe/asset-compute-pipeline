@@ -918,7 +918,7 @@ describe("Pipeline Engine tests", function () {
         // assert download ran
         assert(nock.isDone());
         await pipeline.run(plan);
-    }).timeout(20000);
+    });
 
     it("Should download before refinePlan with input url (refinePlan)", async function () {
         const Engine = proxyquire('../lib/engine', 
