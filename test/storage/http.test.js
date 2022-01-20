@@ -41,6 +41,29 @@ describe('http.js', () => {
 
     describe('download', () => {
 
+        it("should download jpg file (skip head request)", async () => { // this test is skipped in case internet is down
+            const source = {
+                url: "https://example.com/fakeEarth.jpg",
+                name: "fakeEarth.jpg",
+                size: 11,
+                type: 'image/jpeg'
+            };
+
+            mockFs({ './storeFiles/jpg': {} });
+
+            nock("https://example.com")
+                .get("/fakeEarth.jpg")
+                .reply(200, "hello world", {
+                    'content-type': 'image/jpeg',
+                    'content-length': 11
+                });
+
+            const file = './storeFiles/jpg/fakeEarth.jpg';
+
+            await download( source, file);
+            assert.ok(fs.existsSync(file));
+            assert.ok(nock.isDone());
+        });
         it("should download jpg file", async () => { // this test is skipped in case internet is down
             const source = {
                 url: "https://example.com/fakeEarth.jpg",
@@ -50,8 +73,17 @@ describe('http.js', () => {
             mockFs({ './storeFiles/jpg': {} });
 
             nock("https://example.com")
+                .head("/fakeEarth.jpg")
+                .reply(200, "OK", {
+                    'content-type': 'image/jpeg',
+                    'content-length': 11
+                });
+            nock("https://example.com")
                 .get("/fakeEarth.jpg")
-                .reply(200, "ok");
+                .reply(200, "hello world", {
+                    'content-type': 'image/jpeg',
+                    'content-length': 11
+                });
 
             const file = './storeFiles/jpg/fakeEarth.jpg';
 
@@ -66,8 +98,8 @@ describe('http.js', () => {
                 url: "https://example.com/fakeEarth.jpg"
             };
             mockFs({ './storeFiles/jpg': {} });
-
-            http.downloadFile = function() {
+            const oldDownloadFileConcurrently = http.downloadFileConcurrently;
+            http.downloadFileConcurrently = function() {
                 throw new Error('ERRRR. GET \'https://example.com/fakeEarth.jpg\' failed with status 404.');
             };
             const file = './storeFiles/jpg/fakeEarth.jpg';
@@ -79,6 +111,7 @@ describe('http.js', () => {
                 assert.strictEqual(e.location, 'test_action_download');
             }
             assert.ok(! fs.existsSync(file));
+            http.downloadFileConcurrently = oldDownloadFileConcurrently;
         });
 
         it("should fail downloading a jpg file", async () => {
@@ -87,7 +120,9 @@ describe('http.js', () => {
             assert.ok(! fs.existsSync(file));
             const source = {
                 url: "https://example.com/fakeEarth.jpg",
-                name: 'fakeEarth.jpg'
+                name: 'fakeEarth.jpg',
+                size: 11,
+                type: 'image/jpeg'
             };
             mockFs({ "./storeFiles/jpg": {} });
 
@@ -97,16 +132,21 @@ describe('http.js', () => {
 
             try {
                 await download(source, file);
+                assert.fail('should have failed');
             } catch (e) {
                 assert.strictEqual(e.name, "GenericError");
                 assert.strictEqual(e.message, "GET 'https://example.com/fakeEarth.jpg' failed with status 404");
                 assert.strictEqual(e.location, "test_action_download");
             }
-            assert.strictEqual(fs.statSync(file).size, 0); // should error on createReadStream
+            assert.ok(!fs.existsSync(file)); // should error before creating streams
         });
 
         it("should fail downloading once before succeeding", async () => {
-            const source = { url: "https://example.com/fakeEarth.jpg" };
+            const source = { 
+                url: "https://example.com/fakeEarth.jpg",
+                size: 11,
+                type: 'image/jpeg'
+            };
 
             mockFs({ './storeFiles/jpg': {} });
 
@@ -117,7 +157,10 @@ describe('http.js', () => {
                 .reply(504, "error");
             nock("https://example.com")
                 .get("/fakeEarth.jpg")
-                .reply(200, "ok");
+                .reply(200, "hello world", {
+                    'content-type': 'image/jpeg',
+                    'content-length': 11
+                });
 
             process.env.__OW_DEADLINE = Date.now() + 1000;
             await download(source, file);

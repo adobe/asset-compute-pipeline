@@ -887,7 +887,10 @@ describe("Pipeline Engine tests", function () {
 
         nock('https://example.com')
             .get('/fakeEarth.tiff')
-            .reply(200, "ok");
+            .reply(200, "ok", {
+                'content-type': 'image/tiff',
+                'content-length': 2
+            });
         
         const pipeline = new Engine();
         
@@ -897,6 +900,7 @@ describe("Pipeline Engine tests", function () {
         
         const input = {
             type: 'image/tiff',
+            size: 2,
             url: 'https://example.com/fakeEarth.tiff'
         };
         const output = {
@@ -924,7 +928,10 @@ describe("Pipeline Engine tests", function () {
 
         nock('https://example.com')
             .get('/fakeEarth.tiff')
-            .reply(200, "ok");
+            .reply(200, "ok", {
+                'content-type': 'image/tiff',
+                'content-length': 2
+            });
 
         const pipeline = new Engine();
 
@@ -934,6 +941,7 @@ describe("Pipeline Engine tests", function () {
 
         const input = {
             type: 'image/tiff',
+            size: 2,
             url: 'https://example.com/fakeEarth.tiff',
             name: "fakeEarth.tiff"
         };
