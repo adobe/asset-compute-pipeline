@@ -19,6 +19,7 @@ const assert = require('assert');
 const mockFs = require("mock-fs");
 const fs = require('fs-extra');
 const { download, upload } = require('../../lib/storage/http');
+const Asset = require('../../lib/asset');
 const nock = require('nock');
 
 const http = require('@adobe/httptransfer');
@@ -41,7 +42,8 @@ describe('http.js', () => {
 
     describe('download', () => {
 
-        it("should download jpg file (skip head request)", async () => { // this test is skipped in case internet is down
+        it("should download jpg file (skip head request, source.type)", async () => {
+            // source.type
             const source = {
                 url: "https://example.com/fakeEarth.jpg",
                 name: "fakeEarth.jpg",
@@ -64,7 +66,55 @@ describe('http.js', () => {
             assert.ok(fs.existsSync(file));
             assert.ok(nock.isDone());
         });
-        it("should download jpg file", async () => { // this test is skipped in case internet is down
+        it("should download jpg file (skip head request, source.mimetype)", async () => {
+            // source.mimetype
+            const source = new Asset({
+                url: "https://example.com/fakeEarth.jpg",
+                name: "fakeEarth.jpg",
+                size: 11,
+                mimetype: 'image/jpeg'
+            });
+
+            mockFs({ './storeFiles/jpg': {} });
+
+            nock("https://example.com")
+                .get("/fakeEarth.jpg")
+                .reply(200, "hello world", {
+                    'content-type': 'image/jpeg',
+                    'content-length': 11
+                });
+
+            const file = './storeFiles/jpg/fakeEarth.jpg';
+
+            await download( source, file);
+            assert.ok(fs.existsSync(file));
+            assert.ok(nock.isDone());
+        });
+        it("should download jpg file (skip head request, source.mimeType)", async () => {
+            // source.mimetype
+            const source = new Asset({
+                url: "https://example.com/fakeEarth.jpg",
+                name: "fakeEarth.jpg",
+                size: 11,
+                mimeType: 'image/jpeg'
+            });
+
+            mockFs({ './storeFiles/jpg': {} });
+
+            nock("https://example.com")
+                .get("/fakeEarth.jpg")
+                .reply(200, "hello world", {
+                    'content-type': 'image/jpeg',
+                    'content-length': 11
+                });
+
+            const file = './storeFiles/jpg/fakeEarth.jpg';
+
+            await download( source, file);
+            assert.ok(fs.existsSync(file));
+            assert.ok(nock.isDone());
+        });
+        it("should download jpg file (with head request)", async () => { // this test is skipped in case internet is down
             const source = {
                 url: "https://example.com/fakeEarth.jpg",
                 name: "fakeEarth.jpg"
