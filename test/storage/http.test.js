@@ -114,7 +114,7 @@ describe('http.js', () => {
             assert.ok(fs.existsSync(file));
             assert.ok(nock.isDone());
         });
-        it("should download jpg file (with head request)", async () => { // this test is skipped in case internet is down
+        it("should download jpg file (with head request)", async () => {
             const source = {
                 url: "https://example.com/fakeEarth.jpg",
                 name: "fakeEarth.jpg"
