@@ -42,7 +42,7 @@ describe('http.js', () => {
 
     describe('download', () => {
 
-        it("should download jpg file (skip head request, source.type)", async () => {
+        it("should download jpg file (skip head request, source.type is a valid mimetype)", async () => {
             // source.type
             const source = {
                 url: "https://example.com/fakeEarth.jpg",
