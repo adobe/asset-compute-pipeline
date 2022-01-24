@@ -86,7 +86,7 @@ describe("asset.js", () => {
         assert.strictEqual(asset.extension, 'jpeg');
         assert.strictEqual(asset.type, assetParams.mimetype);
     });
-    it('verifies mimeType is mapped to type', function () {
+    it('verifies mimeType is mapped to type (mimeType variable name is case sensitive)', function () {
         const assetParams = {
             mimeType: 'image/jpeg'
         };
