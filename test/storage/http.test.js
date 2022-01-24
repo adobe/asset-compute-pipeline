@@ -90,7 +90,7 @@ describe('http.js', () => {
             assert.ok(fs.existsSync(file));
             assert.ok(nock.isDone());
         });
-        it("should download jpg file (skip head request, source.mimeType)", async () => {
+        it("should download jpg file (skip head request, source.mimeType is a valid mimetype)", async () => {
             // source.mimetype
             const source = new Asset({
                 url: "https://example.com/fakeEarth.jpg",
