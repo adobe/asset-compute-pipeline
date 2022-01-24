@@ -462,7 +462,56 @@ describe('storage.js', () => {
             assert.ok(nock.isDone());
         });
 
-        it('paramsSource object will use url over mimeType to determine extension', async () => {
+        it('paramsSource object will use url over mime type (as `type`) to determine extension', async () => {
+            const paramsSource = {
+                url: 'https://example.com/photo/elephant.png',
+                type: 'image/jpeg',
+                size: 11
+            };
+            const inDirectory = './in/fakeSource/filePath';
+
+            mockFs({ './in/fakeSource/filePath': {} });
+            assert.ok(fs.existsSync(inDirectory));
+
+            nock('https://example.com')
+                .get('/photo/elephant.png')
+                .reply(200, 'hello world', {
+                    'content-type': 'image/png',
+                    'content-length': 11
+                });
+
+            const source = await Storage.getSource(paramsSource, inDirectory);
+
+            assert.strictEqual(source.name, 'source.png');
+            assert.strictEqual(source.path, 'in/fakeSource/filePath/source.png');
+            assert.ok(nock.isDone());
+        });
+        it('paramsSource object will use url over mime type (as `mimetype`) to determine extension', async () => {
+            const paramsSource = {
+                url: 'https://example.com/photo/elephant.png',
+                mimetype: 'image/jpeg',
+                size: 11
+            };
+            const inDirectory = './in/fakeSource/filePath';
+
+            mockFs({ './in/fakeSource/filePath': {} });
+            assert.ok(fs.existsSync(inDirectory));
+
+            nock('https://example.com')
+                .get('/photo/elephant.png')
+                .reply(200, 'hello world', {
+                    'content-type': 'image/png',
+                    'content-length': 11
+                });
+
+            const source = await Storage.getSource(paramsSource, inDirectory);
+
+            assert.strictEqual(source.name, 'source.png');
+            assert.strictEqual(source.path, 'in/fakeSource/filePath/source.png');
+            assert.ok(nock.isDone());
+        });
+
+        it('paramsSource object will use url over mime type (as `mimeType` case sensitive) to determine extension', async () => {
             const paramsSource = {
                 url: 'https://example.com/photo/elephant.png',
                 mimeType: 'image/jpeg',
@@ -487,7 +536,59 @@ describe('storage.js', () => {
             assert.ok(nock.isDone());
         });
 
-        it('paramsSource object will use mimeType over url to determine extension if source name is defined', async () => {
+        it('paramsSource object will use mime type (as `type`) over url to determine extension if source name is defined', async () => {
+            const paramsSource = {
+                url: 'https://example.com/photo/elephant.png',
+                type: 'image/jpeg',
+                name: 'file',
+                size: 11
+            };
+            const inDirectory = './in/fakeSource/filePath';
+
+            mockFs({ './in/fakeSource/filePath': {} });
+            assert.ok(fs.existsSync(inDirectory));
+
+            nock('https://example.com')
+                .get('/photo/elephant.png')
+                .reply(200, 'hello world', {
+                    'content-type': 'image/png',
+                    'content-length': 11
+                });
+
+            const source = await Storage.getSource(paramsSource, inDirectory);
+
+            assert.strictEqual(source.name, 'source.jpeg');
+            assert.strictEqual(source.path, 'in/fakeSource/filePath/source.jpeg');
+            assert.ok(nock.isDone());
+        });
+
+        it('paramsSource object will use mime type (as `mimetype`) over url to determine extension if source name is defined', async () => {
+            const paramsSource = {
+                url: 'https://example.com/photo/elephant.png',
+                mimetype: 'image/jpeg',
+                name: 'file',
+                size: 11
+            };
+            const inDirectory = './in/fakeSource/filePath';
+
+            mockFs({ './in/fakeSource/filePath': {} });
+            assert.ok(fs.existsSync(inDirectory));
+
+            nock('https://example.com')
+                .get('/photo/elephant.png')
+                .reply(200, 'hello world', {
+                    'content-type': 'image/png',
+                    'content-length': 11
+                });
+
+            const source = await Storage.getSource(paramsSource, inDirectory);
+
+            assert.strictEqual(source.name, 'source.jpeg');
+            assert.strictEqual(source.path, 'in/fakeSource/filePath/source.jpeg');
+            assert.ok(nock.isDone());
+        });
+
+        it('paramsSource object will use mime type (as `mimeType` case sensitive) over url to determine extension if source name is defined', async () => {
             const paramsSource = {
                 url: 'https://example.com/photo/elephant.png',
                 mimeType: 'image/jpeg',
@@ -513,7 +614,33 @@ describe('storage.js', () => {
             assert.ok(nock.isDone());
         });
 
-        it('paramsSource object will not fail if invalid mimetype', async () => {
+        it('paramsSource object will not fail if invalid mimetype (as `mimetype`)', async () => {
+            const paramsSource = {
+                url: 'https://example.com/photo/elephant.jpeg',
+                mimetype: 'not a valid mimetype',
+                name: 'file',
+                size: 11
+            };
+            const inDirectory = './in/fakeSource/filePath';
+
+            mockFs({ './in/fakeSource/filePath': {} });
+            assert.ok(fs.existsSync(inDirectory));
+
+            nock('https://example.com')
+                .get('/photo/elephant.jpeg')
+                .reply(200, 'hello world', {
+                    'content-type': 'image/png',
+                    'content-length': 11
+                });
+
+            const source = await Storage.getSource(paramsSource, inDirectory);
+
+            assert.strictEqual(source.name, 'source');
+            assert.strictEqual(source.path, 'in/fakeSource/filePath/source');
+            assert.ok(nock.isDone());
+        });
+
+        it('paramsSource object will not fail if invalid mimetype (as `mimeType` case sensitive)', async () => {
             const paramsSource = {
                 url: 'https://example.com/photo/elephant.jpeg',
                 mimeType: 'not a valid mimetype',
@@ -539,7 +666,59 @@ describe('storage.js', () => {
             assert.ok(nock.isDone());
         });
 
-        it('paramsSource object will take extension in name over mimetype', async () => {
+        it('paramsSource object will take extension in name over mimetype (as `type`)', async () => {
+            const paramsSource = {
+                url: 'https://example.com/photo/elephant.jpeg',
+                type: 'image/jpeg',
+                name: 'file.png',
+                size: 11
+            };
+            const inDirectory = './in/fakeSource/filePath';
+
+            mockFs({ './in/fakeSource/filePath': {} });
+            assert.ok(fs.existsSync(inDirectory));
+
+            nock('https://example.com')
+                .get('/photo/elephant.jpeg')
+                .reply(200, 'hello world', {
+                    'content-type': 'image/jpeg',
+                    'content-length': 11
+                });
+
+            const source = await Storage.getSource(paramsSource, inDirectory);
+
+            assert.strictEqual(source.name, 'source.png');
+            assert.strictEqual(source.path, 'in/fakeSource/filePath/source.png');
+            assert.ok(nock.isDone());
+        });
+
+        it('paramsSource object will take extension in name over mimetype (as `mimetype`)', async () => {
+            const paramsSource = {
+                url: 'https://example.com/photo/elephant.jpeg',
+                mimetype: 'image/jpeg',
+                name: 'file.png',
+                size: 11
+            };
+            const inDirectory = './in/fakeSource/filePath';
+
+            mockFs({ './in/fakeSource/filePath': {} });
+            assert.ok(fs.existsSync(inDirectory));
+
+            nock('https://example.com')
+                .get('/photo/elephant.jpeg')
+                .reply(200, 'hello world', {
+                    'content-type': 'image/jpeg',
+                    'content-length': 11
+                });
+
+            const source = await Storage.getSource(paramsSource, inDirectory);
+
+            assert.strictEqual(source.name, 'source.png');
+            assert.strictEqual(source.path, 'in/fakeSource/filePath/source.png');
+            assert.ok(nock.isDone());
+        });
+
+        it('paramsSource object will take extension in name over mimetype (as `mimeType` case sensitive)', async () => {
             const paramsSource = {
                 url: 'https://example.com/photo/elephant.jpeg',
                 mimeType: 'image/jpeg',

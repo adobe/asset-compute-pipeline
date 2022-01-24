@@ -45,6 +45,7 @@ describe("asset.js", () => {
         assert.ok(asset.name, 'file');
         assert.ok(asset.extension, '');
     });
+
     it('verifies constructor works properly without params', function () {
         const asset = new Asset();
         assert.ok(asset instanceof Asset);
@@ -56,6 +57,7 @@ describe("asset.js", () => {
         assert.strictEqual(asset.headers, undefined);
         assert.strictEqual(asset.type, undefined);
     });
+
     it('verifies constructor works properly with all the asset params', function () {
         const assetParams = {
             type: 'image/jpeg',
@@ -75,6 +77,7 @@ describe("asset.js", () => {
         assert.strictEqual(asset.headers, assetParams.headers);
         assert.strictEqual(asset.type, assetParams.type);
     });
+
     it('verifies mimetype is mapped to type', function () {
         const assetParams = {
             mimetype: 'image/jpeg'
@@ -86,6 +89,7 @@ describe("asset.js", () => {
         assert.strictEqual(asset.extension, 'jpeg');
         assert.strictEqual(asset.type, assetParams.mimetype);
     });
+
     it('verifies mimeType is mapped to type (mimeType variable name is case sensitive)', function () {
         const assetParams = {
             mimeType: 'image/jpeg'
