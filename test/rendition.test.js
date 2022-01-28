@@ -95,6 +95,20 @@ describe("rendition.js", () => {
         assert.strictEqual(await rendition.sha1(), 'fe16bfbff4e31fcf726c18fe4051b71ee8c96150');
     });
 
+    it('verifies method sha1 does not compute a sha1 for an empty file', async function () {
+        const instructions = { "fmt": "png", "target": "TargetName" };
+        const directory = "/";
+        await fs.writeFile("/rendition1.png", '');
+
+        // an empty file should not get a hash
+        const rendition = new Rendition(instructions, directory, 1);
+        assert.strictEqual(await rendition.sha1(), null);
+
+        // write content into the file, now should get a hash
+        await fs.writeFile("/rendition1.png", PNG_CONTENTS);
+        assert.strictEqual(await rendition.sha1(), 'fe16bfbff4e31fcf726c18fe4051b71ee8c96150');
+    });
+
     it('verifies method sha1 handles not finding the file', async function () {
         const instructions = { "fmt": "png", "target": "TargetName" };
         const directory = "/";
