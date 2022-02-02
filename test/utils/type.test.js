@@ -64,6 +64,16 @@ describe("type.js", () => {
             mime: 'text/plain',
             encoding: "us-ascii"
         });
+
+        assert.deepStrictEqual(await detectContentType('./test/files/file.txt'), {
+            mime: 'text/plain',
+            encoding: "us-ascii"
+        });
+
+        assert.deepStrictEqual(await detectContentType('./test/files/1pixel.svg'), {
+            mime: 'image/svg+xml',
+            encoding: "us-ascii"
+        });
     });
 
     describe("file tool fallback", () => {
