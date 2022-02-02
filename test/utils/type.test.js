@@ -70,7 +70,7 @@ describe("type.js", () => {
             encoding: "us-ascii"
         });
 
-        assert.deepStrictEqual(await detectContentType('./test/files/1pixel.svg'), {
+        assert.deepStrictEqual(await detectContentType('./test/files/file.svg'), {
             mime: 'image/svg+xml',
             encoding: "us-ascii"
         });
