@@ -64,10 +64,14 @@ describe("type.js", () => {
             mime: 'text/plain',
             encoding: "us-ascii"
         });
+
+        assert.deepStrictEqual(await detectContentType('./test/files/file.svg'), {
+            mime: 'image/svg+xml',
+            encoding: "us-ascii"
+        });
     });
 
     describe("file tool fallback", () => {
-
         it('provides a fallback if the file command fails', async function () {
             const detectContentType = proxyquire('../../lib/utils/type', {
                 'child_process': {
