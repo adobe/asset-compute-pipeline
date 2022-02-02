@@ -15,7 +15,7 @@
 
 'use strict';
 
-const { detectContentType } = require('../../lib/utils');
+const { detectContentType, normalizeMimetype } = require('../../lib/utils');
 const assert = require('assert');
 const proxyquire = require('proxyquire');
 
@@ -66,10 +66,16 @@ describe("type.js", () => {
         });
     });
 
+    it('normalizes mimetypes', async function () {
+        assert.deepStrictEqual(normalizeMimetype('text/plain'), 'text/plain');
+        assert.deepStrictEqual(normalizeMimetype('image/tiff'), 'image/tiff');
+        assert.deepStrictEqual(normalizeMimetype('image/svg'), 'image/svg+xml');
+    });
+
     describe("file tool fallback", () => {
 
         it('provides a fallback if the file command fails', async function () {
-            const detectContentType = proxyquire('../../lib/utils/type', {
+            const { detectContentType } = proxyquire('../../lib/utils/type', {
                 'child_process': {
                     exec: () => {
                         throw new Error('file command failure simulation');
