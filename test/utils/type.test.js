@@ -20,7 +20,7 @@ const assert = require('assert');
 const proxyquire = require('proxyquire');
 
 describe("type.js", () => {
-    it('detects mimetypes and encodings', async function () {
+    it.only('detects mimetypes and encodings', async function () {
         const result = await detectContentType('./test/files/file.bmp');
         assert.ok(result.mime === 'image/bmp' || result.mime === 'image/x-ms-bmp');
         assert.ok(result.encoding === 'binary');
@@ -65,11 +65,6 @@ describe("type.js", () => {
             encoding: "us-ascii"
         });
 
-        assert.deepStrictEqual(await detectContentType('./test/files/file.txt'), {
-            mime: 'text/plain',
-            encoding: "us-ascii"
-        });
-
         assert.deepStrictEqual(await detectContentType('./test/files/file.svg'), {
             mime: 'image/svg+xml',
             encoding: "us-ascii"
@@ -77,7 +72,6 @@ describe("type.js", () => {
     });
 
     describe("file tool fallback", () => {
-
         it('provides a fallback if the file command fails', async function () {
             const detectContentType = proxyquire('../../lib/utils/type', {
                 'child_process': {
