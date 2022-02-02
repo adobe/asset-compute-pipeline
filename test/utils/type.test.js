@@ -15,67 +15,67 @@
 
 'use strict';
 
-const { detectContentType, normalizeMimetype } = require('../../lib/utils');
+const { Mimetype } = require('../../lib/utils');
 const assert = require('assert');
 const proxyquire = require('proxyquire');
 
 describe("type.js", () => {
     it('detects mimetypes and encodings', async function () {
-        const result = await detectContentType('./test/files/file.bmp');
+        const result = await Mimetype.detectContentType('./test/files/file.bmp');
         assert.ok(result.mime === 'image/bmp' || result.mime === 'image/x-ms-bmp');
         assert.ok(result.encoding === 'binary');
 
-        assert.deepStrictEqual(await detectContentType('./test/files/file.tif'), {
+        assert.deepStrictEqual(await Mimetype.detectContentType('./test/files/file.tif'), {
             mime: 'image/tiff',
             encoding: "binary"
         });
 
-        assert.deepStrictEqual(await detectContentType('./test/files/file with spaces in name.txt'), {
+        assert.deepStrictEqual(await Mimetype.detectContentType('./test/files/file with spaces in name.txt'), {
             mime: 'application/octet-stream',
             encoding: "binary"
         });
 
-        assert.deepStrictEqual(await detectContentType('./test/files/negative/1pixel.png'), {
+        assert.deepStrictEqual(await Mimetype.detectContentType('./test/files/negative/1pixel.png'), {
             mime: 'image/png',
             encoding: "binary"
         });
 
-        assert.deepStrictEqual(await detectContentType('./test/files/negative/1pixel-masquerade.png'), {
+        assert.deepStrictEqual(await Mimetype.detectContentType('./test/files/negative/1pixel-masquerade.png'), {
             mime: 'image/webp',
             encoding: "binary"
         });
 
-        assert.deepStrictEqual(await detectContentType('./test/files/negative/file-webp-masquerading-as-png.png'), {
+        assert.deepStrictEqual(await Mimetype.detectContentType('./test/files/negative/file-webp-masquerading-as-png.png'), {
             mime: 'image/webp',
             encoding: "binary"
         });
 
-        assert.deepStrictEqual(await detectContentType('./test/files/negative/png-masquerading-as-jpg.jpg'), {
+        assert.deepStrictEqual(await Mimetype.detectContentType('./test/files/negative/png-masquerading-as-jpg.jpg'), {
             mime: 'image/png',
             encoding: "binary"
         });
 
-        assert.deepStrictEqual(await detectContentType('./test/files/file.tif'), {
+        assert.deepStrictEqual(await Mimetype.detectContentType('./test/files/file.tif'), {
             mime: 'image/tiff',
             encoding: "binary"
         });
 
-        assert.deepStrictEqual(await detectContentType('./test/files/file.txt'), {
+        assert.deepStrictEqual(await Mimetype.detectContentType('./test/files/file.txt'), {
             mime: 'text/plain',
             encoding: "us-ascii"
         });
     });
 
     it('normalizes mimetypes', async function () {
-        assert.deepStrictEqual(normalizeMimetype('text/plain'), 'text/plain');
-        assert.deepStrictEqual(normalizeMimetype('image/tiff'), 'image/tiff');
-        assert.deepStrictEqual(normalizeMimetype('image/svg'), 'image/svg+xml');
+        assert.deepStrictEqual(Mimetype.normalizeMimetype('text/plain'), 'text/plain');
+        assert.deepStrictEqual(Mimetype.normalizeMimetype('image/tiff'), 'image/tiff');
+        assert.deepStrictEqual(Mimetype.normalizeMimetype('image/svg'), 'image/svg+xml');
     });
 
     describe("file tool fallback", () => {
 
         it('provides a fallback if the file command fails', async function () {
-            const { detectContentType } = proxyquire('../../lib/utils/type', {
+            const Mimetype = proxyquire('../../lib/utils/type', {
                 'child_process': {
                     exec: () => {
                         throw new Error('file command failure simulation');
@@ -83,7 +83,7 @@ describe("type.js", () => {
                 }
             });
 
-            assert.deepStrictEqual(await detectContentType('./test/files/file.jpg'), {
+            assert.deepStrictEqual(await Mimetype.detectContentType('./test/files/file.jpg'), {
                 mime: "image/jpeg"
             });
         });

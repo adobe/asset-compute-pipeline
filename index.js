@@ -17,7 +17,7 @@ const Asset = require("./lib/asset");
 const { Prepare } = require("./lib/prepare");
 const { Rendition } = require("./lib/rendition");
 const { Storage } = require("./lib/storage");
-const { Utils, Timer, detectContentType, ImageInfo } = require("./lib/utils");
+const { Utils, Timer, Mimetype, ImageInfo } = require("./lib/utils");
 const Transformer = require("./lib/transformer");
 const { Plan } = require("./lib/plan");
 const Engine = require("./lib/engine");
@@ -32,7 +32,7 @@ module.exports = {
     Storage,
     Utils,
     Timer,
-    detectContentType,
+    Mimetype,
     ImageInfo,
     Transformer,
     Plan,
