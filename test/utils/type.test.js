@@ -20,7 +20,7 @@ const assert = require('assert');
 const proxyquire = require('proxyquire');
 
 describe("type.js", () => {
-    it.only('detects mimetypes and encodings', async function () {
+    it('detects mimetypes and encodings', async function () {
         const result = await detectContentType('./test/files/file.bmp');
         assert.ok(result.mime === 'image/bmp' || result.mime === 'image/x-ms-bmp');
         assert.ok(result.encoding === 'binary');
