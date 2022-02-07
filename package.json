@@ -2,7 +2,7 @@
   "name": "@adobe/asset-compute-pipeline",
   "description": "Asset Compute Pipeline Library",
   "license": "Apache-2.0",
-  "version": "7.0.1",
+  "version": "7.0.3",
   "author": {
     "name": "Adobe Inc."
   },
@@ -46,20 +46,20 @@
     "sinon": "^10.0.1"
   },
   "dependencies": {
-    "@adobe/aio-lib-files": "^2.2.0",
-    "@adobe/asset-compute-commons": "^1.1.5",
+    "@adobe/aio-lib-files": "^2.2.1",
+    "@adobe/asset-compute-commons": "^1.1.6",
     "@adobe/httptransfer": "^3.1.2",
     "clone": "^2.1.2",
     "css-unit-converter": "^1.1.2",
     "data-uri-to-buffer": "^3.0.1",
-    "debug": "^4.3.2",
+    "debug": "^4.3.3",
     "file-type": "^16.5.3",
     "fs-extra": "^10.0.0",
     "gm": "^1.23.1",
     "graph-data-structure": "^1.15.0",
-    "image-size": "^1.0.0",
+    "image-size": "^1.0.1",
     "mime": "^3.0.0",
-    "mime-types": "^2.1.33",
+    "mime-types": "^2.1.34",
     "valid-data-url": "^4.0.0"
   }
 }
