@@ -154,6 +154,7 @@ describe('storage.js', () => {
             const name = 'source';
             const disableSourceDownload = true;
 
+            
             mockFs.restore();
             const { Storage } = proxyquire('../../lib/storage', {
                 './datauri': {
