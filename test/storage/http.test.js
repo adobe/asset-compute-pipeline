@@ -325,7 +325,6 @@ describe('http.js', () => {
 
             await download( source, file);
             assert.ok(fs.existsSync(file));
-            assert.ok(nock.isDone());
         });
         it("should download jpg file with default preferred part size and decreased concurrency (mocked httptransfer)", async () => {
             // mockFs messes with proxyquire and rewire loading files
@@ -360,7 +359,6 @@ describe('http.js', () => {
 
             await download( source, file);
             assert.ok(fs.existsSync(file));
-            assert.ok(nock.isDone());
         });
     });
     describe('upload', () => {
@@ -518,6 +516,79 @@ describe('http.js', () => {
             assert.ok(fs.existsSync(file));
             await upload(rendition);
             assert.ok(! nock.isDone());
+        });
+
+        it("should upload jpg file with default preferred part size and concurrency (mocked httptransfer)", async () => {
+            // mockFs messes with proxyquire and rewire loading files
+            // must restore mockFs before using these libraries
+            mockFs.restore();
+            const file = "./storeFiles/jpg/fakeEarth.jpg";
+            const rendition = {
+                path: file,
+                target: "https://example.com/fakeEarth.jpg",
+                name: 'fakeEarth.jpg',
+                size: () => 1,
+                contentType: async () => "image/jpeg"
+            };
+            const { upload } = proxyquire('../../lib/storage/http.js', {
+                '@adobe/httptransfer':  {
+                    uploadFileConcurrently: async function(filepath, target, options) {
+                        assert.strictEqual(filepath, file);
+                        assert.strictEqual(target, "https://example.com/fakeEarth.jpg");
+                        assert.strictEqual(options.maxConcurrent, DEFAULT_MAX_CONCURRENT);
+                        assert.strictEqual(options.preferredPartSize, DEFAULT_PREFERRED_PART_SIZE);
+                        assert.ok(fs.existsSync(filepath));
+                    }
+                }
+            });
+
+            const containerMemorySizeInBytes = '1073741824'; // 1gb
+
+            mockFs({ 
+                './storeFiles/jpg': {
+                    "fakeEarth.jpg": "hello world!"
+                },
+                '/sys/fs/cgroup/memory/memory.limit_in_bytes': containerMemorySizeInBytes
+            });
+
+            assert.ok(fs.existsSync(file));
+            await upload(rendition);
+        });
+        it("should upload jpg file with default preferred part size and decreased concurrency (mocked httptransfer)", async () => {
+            // mockFs messes with proxyquire and rewire loading files
+            // must restore mockFs before using these libraries
+            mockFs.restore();
+            const file = "./storeFiles/jpg/fakeEarth.jpg";
+            const rendition = {
+                path: file,
+                target: "https://example.com/fakeEarth.jpg",
+                name: 'fakeEarth.jpg',
+                size: () => 1,
+                contentType: async () => "image/jpeg"
+            };
+            const { upload } = proxyquire('../../lib/storage/http.js', {
+                '@adobe/httptransfer':  {
+                    uploadFileConcurrently: async function(filepath, target, options) {
+                        assert.strictEqual(filepath, file);
+                        assert.strictEqual(target, "https://example.com/fakeEarth.jpg");
+                        assert.strictEqual(options.maxConcurrent, 4);
+                        assert.strictEqual(options.preferredPartSize, DEFAULT_PREFERRED_PART_SIZE);
+                        assert.ok(fs.existsSync(filepath));
+                    }
+                }
+            });
+
+            const containerMemorySizeInBytes = '536870912'; // 1gb
+
+            mockFs({ 
+                './storeFiles/jpg': {
+                    "fakeEarth.jpg": "hello world!"
+                },
+                '/sys/fs/cgroup/memory/memory.limit_in_bytes': containerMemorySizeInBytes
+            });
+
+            assert.ok(fs.existsSync(file));
+            await upload(rendition);
         });
 
     });
