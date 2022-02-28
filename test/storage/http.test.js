@@ -51,11 +51,11 @@ describe('http.js', () => {
     });
 
     describe('getMaxConcurrent', () => {
-        it("no containerMemorySize available, default concurrency",  async () => {
+        it("no containerMemorySize available, use default concurrency",  async () => {
             const maxConcurrent = await getMaxConcurrent(DEFAULT_PREFERRED_PART_SIZE);
             assert.strictEqual(maxConcurrent, DEFAULT_MAX_CONCURRENT);
         });
-        it("containerMemorySize is missing or malformated, default concurrency",  async () => {
+        it("containerMemorySize is missing or malformated, use default concurrency",  async () => {
             mockFs({ '/sys/fs/cgroup/memory/memory.limit_in_bytes': 'not a valid number' });
             const maxConcurrent = await getMaxConcurrent(DEFAULT_PREFERRED_PART_SIZE);
             assert.strictEqual(maxConcurrent, DEFAULT_MAX_CONCURRENT);
@@ -83,13 +83,19 @@ describe('http.js', () => {
             const maxConcurrent = await getMaxConcurrent(DEFAULT_PREFERRED_PART_SIZE);
             assert.strictEqual(maxConcurrent, DEFAULT_MAX_CONCURRENT);
         });
-        it("containerMemorySize is barely too small, adjust concurrency down",  async () => {
+        it("containerMemorySize is just big enough, use default concurrency",  async () => {
+            const containerMemorySizeInBytes = '10066329601'; // 1gb
+            mockFs({ '/sys/fs/cgroup/memory/memory.limit_in_bytes': containerMemorySizeInBytes });
+            const maxConcurrent = await getMaxConcurrent(DEFAULT_PREFERRED_PART_SIZE);
+            assert.strictEqual(maxConcurrent, 8);
+        });
+        it("containerMemorySize is 1 byte too small, adjust concurrency down",  async () => {
             const containerMemorySizeInBytes = '1006632960'; // 1gb
             mockFs({ '/sys/fs/cgroup/memory/memory.limit_in_bytes': containerMemorySizeInBytes });
             const maxConcurrent = await getMaxConcurrent(DEFAULT_PREFERRED_PART_SIZE);
             assert.strictEqual(maxConcurrent, 7);
         });
-        it("containerMemorySize is 512mb",  async () => {
+        it("containerMemorySize is 512mb, adjust concurrency down",  async () => {
             // worker-dcx, worker-transfer, worker-zip, worker-indesign fall into this category
             const containerMemorySizeInBytes = '536870912'; // 1gb
             mockFs({ '/sys/fs/cgroup/memory/memory.limit_in_bytes': containerMemorySizeInBytes });
