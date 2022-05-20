@@ -986,7 +986,7 @@ describe("Pipeline Engine tests", function () {
         const result = await pipeline.run(plan);
         assert.ok(result.renditionErrors);
         assert.strictEqual(result.renditionErrors[0].reason, 'SourceCorrupt');
-        assert.ok(result.renditionErrors[0].message.includes('First 767 KiB of file is binary zeros'));
+        assert.ok(result.renditionErrors[0].message.includes('binary zeros'));
     });
     it("Pipeline fails with SourceCorruptError in metadata check due to file format error", async function () {
         const params = {
