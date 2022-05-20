@@ -1002,7 +1002,7 @@ describe("Pipeline Engine tests", function () {
         const plan = new Plan();
         const input = {
             type: 'image/png',
-            path: './test/files/fried.psd'
+            path: './test/files/broken.psd'
         };
         const output = {
             type: "image/png"
