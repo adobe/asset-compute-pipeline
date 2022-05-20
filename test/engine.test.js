@@ -961,4 +961,57 @@ describe("Pipeline Engine tests", function () {
         assert(nock.isDone());
         await pipeline.run(plan);
     });
+
+    it("Pipeline fails with SourceCorruptError in metadata check because file contains zeros", async function () {
+        const params = {
+            auth: {
+                apiKey: "hello",
+                token: "world"
+            }
+        };
+
+        const pipeline = new Engine(params);
+
+        // execution: plan creation & running
+        const plan = new Plan();
+        const input = {
+            type: 'image/png',
+            path: './test/files/broken.jpg'
+        };
+        const output = {
+            type: "image/png"
+        };
+        await pipeline.refinePlan(plan, input, output);
+
+        const result = await pipeline.run(plan);
+        assert.ok(result.renditionErrors);
+        assert.strictEqual(result.renditionErrors[0].reason, 'SourceCorrupt');
+        assert.ok(result.renditionErrors[0].message.includes('First 767 KiB of file is binary zeros'));
+    });
+    it("Pipeline fails with SourceCorruptError in metadata check due to file format error", async function () {
+        const params = {
+            auth: {
+                apiKey: "hello",
+                token: "world"
+            }
+        };
+
+        const pipeline = new Engine(params);
+
+        // execution: plan creation & running
+        const plan = new Plan();
+        const input = {
+            type: 'image/png',
+            path: './test/files/fried.psd'
+        };
+        const output = {
+            type: "image/png"
+        };
+        await pipeline.refinePlan(plan, input, output);
+
+        const result = await pipeline.run(plan);
+        assert.ok(result.renditionErrors);
+        assert.strictEqual(result.renditionErrors[0].reason, 'SourceCorrupt');
+        assert.ok(result.renditionErrors[0].message.includes('improper image header'));
+    });
 });
