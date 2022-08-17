@@ -48,7 +48,7 @@
   },
   "dependencies": {
     "@adobe/aio-lib-files": "^2.2.1",
-    "@adobe/asset-compute-commons": "^1.1.8",
+    "@adobe/asset-compute-commons": "^1.1.9",
     "@adobe/httptransfer": "^3.1.6",
     "clone": "^2.1.2",
     "css-unit-converter": "^1.1.2",
