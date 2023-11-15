@@ -61,7 +61,7 @@ Object containing the following attributes:
 | `headers` | `object` | Object containining additional headers to use when doing a HTTP(S) request towards the `url` | `headers: { 'Authorization': 'auth-headers' }` |
 
 ##### **`output`**
-Object containing the following attributes:
+Object containing following attributes:
 
 | Name | Type | Description |
 |------|------|-------------|
