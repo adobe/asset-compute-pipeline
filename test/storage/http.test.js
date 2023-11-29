@@ -93,14 +93,14 @@ describe('http.js', () => {
             const containerMemorySizeInBytes = '1006632960'; // 1gb
             mockFs({ '/sys/fs/cgroup/memory/memory.limit_in_bytes': containerMemorySizeInBytes });
             const maxConcurrent = await getMaxConcurrent(DEFAULT_PREFERRED_PART_SIZE);
-            assert.strictEqual(maxConcurrent, 8);
+            assert.strictEqual(maxConcurrent, 7);
         });
         it("containerMemorySize is 512mb, adjust concurrency down",  async () => {
             // worker-dcx, worker-transfer, worker-zip, worker-indesign fall into this category
             const containerMemorySizeInBytes = '536870912'; // 1gb
             mockFs({ '/sys/fs/cgroup/memory/memory.limit_in_bytes': containerMemorySizeInBytes });
             const maxConcurrent = await getMaxConcurrent(DEFAULT_PREFERRED_PART_SIZE);
-            assert.strictEqual(maxConcurrent, 8);
+            assert.strictEqual(maxConcurrent, 4);
         });
         it("containerMemorySize is 256mb, adjust concurrency down",  async () => {
             // this is the default for IO runtime actions
@@ -108,7 +108,7 @@ describe('http.js', () => {
             const containerMemorySizeInBytes = '268435456'; // 1gb
             mockFs({ '/sys/fs/cgroup/memory/memory.limit_in_bytes': containerMemorySizeInBytes });
             const maxConcurrent = await getMaxConcurrent(DEFAULT_PREFERRED_PART_SIZE);
-            assert.strictEqual(maxConcurrent, 8);
+            assert.strictEqual(maxConcurrent, 2);
         });
         it("containerMemorySize is 256mb but preferred part size is 10mb, so default concurrency is chosen",  async () => {
             // this is the default for IO runtime actions
@@ -350,20 +350,20 @@ describe('http.js', () => {
                     downloadFileConcurrently: async function(url, filepath, options) {
                         assert.strictEqual(url, source.url);
                         assert.strictEqual(filepath, './storeFiles/jpg/fakeEarth.jpg');
-                        assert.strictEqual(options.maxConcurrent, 8);
+                        assert.strictEqual(options.maxConcurrent, 4);
                         assert.strictEqual(options.preferredPartSize, DEFAULT_PREFERRED_PART_SIZE);
                         fs.writeFileSync(file, 'hello world');
                     }
                 }
             });
-
+            
             const containerMemorySizeInBytes = '536870912'; // 512mb
             mockFs({
                 './storeFiles/jpg': {},
                 '/sys/fs/cgroup/memory/memory.limit_in_bytes': containerMemorySizeInBytes
             });
 
-            await download(source, file);
+            await download( source, file);
             assert.ok(fs.existsSync(file));
         });
     });
@@ -577,7 +577,7 @@ describe('http.js', () => {
                     uploadFileConcurrently: async function(filepath, target, options) {
                         assert.strictEqual(filepath, file);
                         assert.strictEqual(target, "https://example.com/fakeEarth.jpg");
-                        assert.strictEqual(options.maxConcurrent, 8);
+                        assert.strictEqual(options.maxConcurrent, 4);
                         assert.strictEqual(options.preferredPartSize, DEFAULT_PREFERRED_PART_SIZE);
                         assert.ok(fs.existsSync(filepath));
                     }
@@ -586,7 +586,7 @@ describe('http.js', () => {
 
             const containerMemorySizeInBytes = '536870912'; // 1gb
 
-            mockFs({
+            mockFs({ 
                 './storeFiles/jpg': {
                     "fakeEarth.jpg": "hello world!"
                 },
