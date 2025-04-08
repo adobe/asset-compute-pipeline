@@ -286,6 +286,46 @@ describe("Pipeline Engine tests", function () {
         assert.strictEqual(runCounts, 2);
     });
 
+    it("Passes firefall auth parameters correctly to transformer", async function () {
+        const params = {
+            auth: {
+                apiKey: "test-key",
+                token: "test-token"
+            },
+            firefallClientId: "test-client-id",
+            firefallClientSecret: "test-client-secret",
+            firefallAuthCode: "test-auth-code",
+            firefallTier: "test-tier"
+        };
+
+        const pipeline = new Engine(params);
+
+        let authVerified = false;
+        class TestTransformer extends Transformer {
+            async compute(input) {
+                // verify auth params
+                assert.strictEqual(input.auth.apiKey, "test-key");
+                assert.strictEqual(input.auth.token, "test-token");
+                
+                // verify firefall params
+                assert.strictEqual(input.auth.firefall.firefallClientId, "test-client-id");
+                assert.strictEqual(input.auth.firefall.firefallClientSecret, "test-client-secret");
+                assert.strictEqual(input.auth.firefall.firefallAuthCode, "test-auth-code");
+                assert.strictEqual(input.auth.firefall.firefallTier, "test-tier");
+                
+                authVerified = true;
+            }
+        }
+        
+        pipeline.registerTransformer(new TestTransformer("test"));
+
+        const plan = new Plan();
+        plan.add("test", DEFAULT_ATTRIBUTES);
+
+        await pipeline.run(plan);
+        assert.ok(authVerified, "Auth parameters verification was not executed");
+    });
+
     it("Last added transformer wins when names are duplicated", async function () {
         const pipeline = new Engine();
 
