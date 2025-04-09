@@ -360,7 +360,7 @@ describe("Pipeline Engine tests", function () {
         assert.ok(authVerified, "Auth parameters verification was not executed");
     });
 
-    it("Handles case when auth is not provided", async function () {
+    it("Sets firefall auth when auth is not provided", async function () {
         const params = {
             // No auth object
             firefallClientId: "test-client-id",
@@ -372,10 +372,11 @@ describe("Pipeline Engine tests", function () {
         let authVerified = false;
         class TestTransformer extends Transformer {
             async compute(input) {
-                // auth should be an empty object
-                assert.deepStrictEqual(input.auth, {});
+                // auth should be initialized as an empty object
+                assert.ok(input.auth, "input.auth should exist");
                 
                 // firefall object should exist with parameters
+                assert.ok(input.auth.firefall, "input.auth.firefall should exist");
                 assert.strictEqual(input.auth.firefall.firefallClientId, "test-client-id");
                 assert.strictEqual(input.auth.firefall.firefallTier, "test-tier");
                 assert.strictEqual(input.auth.firefall.firefallClientSecret, undefined);
