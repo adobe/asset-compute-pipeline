@@ -286,6 +286,115 @@ describe("Pipeline Engine tests", function () {
         assert.strictEqual(runCounts, 2);
     });
 
+    it("Passes firefall auth parameters correctly to transformer", async function () {
+        const params = {
+            auth: {
+                apiKey: "test-key",
+                token: "test-token"
+            },
+            firefallClientId: "test-client-id",
+            firefallClientSecret: "test-client-secret",
+            firefallAuthCode: "test-auth-code",
+            firefallTier: "test-tier"
+        };
+
+        const pipeline = new Engine(params);
+
+        let authVerified = false;
+        class TestTransformer extends Transformer {
+            async compute(input) {
+                // verify auth params
+                assert.strictEqual(input.auth.apiKey, "test-key");
+                assert.strictEqual(input.auth.token, "test-token");
+                
+                // verify firefall params
+                assert.strictEqual(input.auth.firefall.firefallClientId, "test-client-id");
+                assert.strictEqual(input.auth.firefall.firefallClientSecret, "test-client-secret");
+                assert.strictEqual(input.auth.firefall.firefallAuthCode, "test-auth-code");
+                assert.strictEqual(input.auth.firefall.firefallTier, "test-tier");
+                
+                authVerified = true;
+            }
+        }
+        
+        pipeline.registerTransformer(new TestTransformer("test"));
+
+        const plan = new Plan();
+        plan.add("test", DEFAULT_ATTRIBUTES);
+
+        await pipeline.run(plan);
+        assert.ok(authVerified, "Auth parameters verification was not executed");
+    });
+
+    it("Doesn't set firefall object when no firefall parameters are provided", async function () {
+        const params = {
+            auth: {
+                apiKey: "test-key",
+                token: "test-token"
+            }
+            // No firefall parameters
+        };
+
+        const pipeline = new Engine(params);
+
+        let authVerified = false;
+        class TestTransformer extends Transformer {
+            async compute(input) {
+                // verify auth params
+                assert.strictEqual(input.auth.apiKey, "test-key");
+                assert.strictEqual(input.auth.token, "test-token");
+                
+                // firefall object should not exist
+                assert.strictEqual(input.auth.firefall, undefined);
+                
+                authVerified = true;
+            }
+        }
+        
+        pipeline.registerTransformer(new TestTransformer("test"));
+
+        const plan = new Plan();
+        plan.add("test", DEFAULT_ATTRIBUTES);
+
+        await pipeline.run(plan);
+        assert.ok(authVerified, "Auth parameters verification was not executed");
+    });
+
+    it("Sets firefall auth when auth is not provided", async function () {
+        const params = {
+            // No auth object
+            firefallClientId: "test-client-id",
+            firefallTier: "test-tier"
+        };
+
+        const pipeline = new Engine(params);
+
+        let authVerified = false;
+        class TestTransformer extends Transformer {
+            async compute(input) {
+                // auth should be initialized as an empty object
+                assert.ok(input.auth, "input.auth should exist");
+                
+                // firefall object should exist with parameters
+                assert.ok(input.auth.firefall, "input.auth.firefall should exist");
+                assert.strictEqual(input.auth.firefall.firefallClientId, "test-client-id");
+                assert.strictEqual(input.auth.firefall.firefallTier, "test-tier");
+                assert.strictEqual(input.auth.firefall.firefallClientSecret, undefined);
+                assert.strictEqual(input.auth.firefall.firefallAuthCode, undefined);
+                
+                authVerified = true;
+            }
+        }
+        
+        pipeline.registerTransformer(new TestTransformer("test"));
+
+        const plan = new Plan();
+        plan.add("test", DEFAULT_ATTRIBUTES);
+
+        await pipeline.run(plan);
+        assert.ok(authVerified, "Auth parameters verification was not executed");
+    });
+
     it("Last added transformer wins when names are duplicated", async function () {
         const pipeline = new Engine();
 
