@@ -295,7 +295,8 @@ describe("Pipeline Engine tests", function () {
             firefallClientId: "test-client-id",
             firefallClientSecret: "test-client-secret",
             firefallAuthCode: "test-auth-code",
-            firefallTier: "test-tier"
+            firefallTier: "test-tier",
+            azureOpenAiApiKey: "test-api-key"
         };
 
         const pipeline = new Engine(params);
@@ -312,7 +313,9 @@ describe("Pipeline Engine tests", function () {
                 assert.strictEqual(input.auth.firefall.firefallClientSecret, "test-client-secret");
                 assert.strictEqual(input.auth.firefall.firefallAuthCode, "test-auth-code");
                 assert.strictEqual(input.auth.firefall.firefallTier, "test-tier");
-                
+
+                assert.strictEqual(input.auth.azure.openaiapikey, "test-api-key");
+
                 authVerified = true;
             }
         }
@@ -381,7 +384,8 @@ describe("Pipeline Engine tests", function () {
                 assert.strictEqual(input.auth.firefall.firefallTier, "test-tier");
                 assert.strictEqual(input.auth.firefall.firefallClientSecret, undefined);
                 assert.strictEqual(input.auth.firefall.firefallAuthCode, undefined);
-                
+                assert.strictEqual(input.auth.firefall.azureOpenAiApiKey, undefined);
+
                 authVerified = true;
             }
         }
