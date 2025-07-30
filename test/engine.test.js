@@ -313,7 +313,8 @@ describe("Pipeline Engine tests", function () {
                 assert.strictEqual(input.auth.firefall.firefallClientSecret, "test-client-secret");
                 assert.strictEqual(input.auth.firefall.firefallAuthCode, "test-auth-code");
                 assert.strictEqual(input.auth.firefall.firefallTier, "test-tier");
-                assert.strictEqual(input.auth.firefall.azureOpenAiApiKey, "test-api-key");
+
+                assert.strictEqual(input.auth.azure.openaiapikey, "test-api-key");
 
                 authVerified = true;
             }
