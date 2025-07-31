@@ -363,6 +363,90 @@ describe("Pipeline Engine tests", function () {
         assert.ok(authVerified, "Auth parameters verification was not executed");
     });
 
+    it("Filters userData to only include allowed fields", async function () {
+        const params = {
+            auth: {
+                apiKey: "test-key"
+            },
+            userData: {
+                // Allowed fields
+                assetUuid: "test-uuid-123",
+                assetPath: "/content/dam/test.jpg",
+                eventHandlerId: "test.handler",
+                repositoryId: "repo-123",
+                name: "test.jpg",
+                uploadToken: "upload-token-456",
+                
+                // Fields that should be filtered out
+                accessToken: "secret-token",
+                apiKey: "secret-key",
+                password: "secret-password",
+                customField: "should-be-filtered",
+                clientSecret: "very-secret"
+            }
+        };
+
+        const pipeline = new Engine(params);
+
+        let userDataVerified = false;
+        class TestTransformer extends Transformer {
+            async compute(input) {
+                // Verify allowed fields are present
+                assert.strictEqual(input.userData.assetUuid, "test-uuid-123");
+                assert.strictEqual(input.userData.assetPath, "/content/dam/test.jpg");
+                assert.strictEqual(input.userData.eventHandlerId, "test.handler");
+                assert.strictEqual(input.userData.repositoryId, "repo-123");
+                assert.strictEqual(input.userData.name, "test.jpg");
+                assert.strictEqual(input.userData.uploadToken, "upload-token-456");
+                
+                // Verify filtered fields are not present
+                assert.strictEqual(input.userData.accessToken, undefined);
+                assert.strictEqual(input.userData.apiKey, undefined);
+                assert.strictEqual(input.userData.password, undefined);
+                assert.strictEqual(input.userData.customField, undefined);
+                assert.strictEqual(input.userData.clientSecret, undefined);
+                
+                userDataVerified = true;
+            }
+        }
+        
+        pipeline.registerTransformer(new TestTransformer("test"));
+
+        const plan = new Plan();
+        plan.add("test", DEFAULT_ATTRIBUTES);
+
+        await pipeline.run(plan);
+        assert.ok(userDataVerified, "userData filtering verification was not executed");
+    });
+
+    it("Handles userData when no userData is provided", async function () {
+        const params = {
+            auth: {
+                apiKey: "test-key"
+            }
+            // No userData
+        };
+
+        const pipeline = new Engine(params);
+
+        let userDataVerified = false;
+        class TestTransformer extends Transformer {
+            async compute(input) {
+                // userData should not be present when not provided
+                assert.strictEqual(input.userData, undefined);
+                userDataVerified = true;
+            }
+        }
+        
+        pipeline.registerTransformer(new TestTransformer("test"));
+
+        const plan = new Plan();
+        plan.add("test", DEFAULT_ATTRIBUTES);
+
+        await pipeline.run(plan);
+        assert.ok(userDataVerified, "userData absence verification was not executed");
+    });
+
     it("Sets firefall auth when auth is not provided", async function () {
         const params = {
             // No auth object
