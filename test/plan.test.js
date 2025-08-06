@@ -107,7 +107,7 @@ describe("Plan", function() {
         plan.advance();
         assert.strictEqual(plan.state, PLAN_STATE.SUCCEEDED);
 
-        // once state is un succeeded, it cannot change
+        // once state is in succeeded, it cannot change
         plan.fail();
         assert.strictEqual(plan.state, PLAN_STATE.SUCCEEDED);
     });
