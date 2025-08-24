@@ -34,6 +34,10 @@ const oldDownloadFileHttpTransfer = http.downloadFileConcurrently;
 const DEFAULT_MAX_CONCURRENT = 8;
 const DEFAULT_PREFERRED_PART_SIZE = 100 * 1024 * 1024; // Default part size is 10mb
 
+// cgroup file locations for v1 and v2
+const CGROUP_V1_MEMORY_LIMIT_PATH = '/sys/fs/cgroup/memory/memory.limit_in_bytes';
+const CGROUP_V2_MEMORY_LIMIT_PATH = '/sys/fs/cgroup/memory.max';
+
 describe('http.js', () => {
 
     beforeEach( () => {
@@ -56,7 +60,7 @@ describe('http.js', () => {
             assert.strictEqual(maxConcurrent, DEFAULT_MAX_CONCURRENT);
         });
         it("containerMemorySize is missing or malformated, use default concurrency",  async () => {
-            mockFs({ '/sys/fs/cgroup/memory/memory.limit_in_bytes': 'not a valid number' });
+            mockFs({ [CGROUP_V1_MEMORY_LIMIT_PATH]: 'not a valid number' });
             const maxConcurrent = await getMaxConcurrent(DEFAULT_PREFERRED_PART_SIZE);
             assert.strictEqual(maxConcurrent, DEFAULT_MAX_CONCURRENT);
         });
@@ -65,40 +69,40 @@ describe('http.js', () => {
             // although there is a lot of memory available and we could use higher concurrency,
             // we still use the default concurrency
             const containerMemorySizeInBytes = '41943040000'; // 1gb
-            mockFs({ '/sys/fs/cgroup/memory/memory.limit_in_bytes': containerMemorySizeInBytes });
+            mockFs({ [CGROUP_V1_MEMORY_LIMIT_PATH]: containerMemorySizeInBytes });
             const maxConcurrent = await getMaxConcurrent(DEFAULT_PREFERRED_PART_SIZE);
             assert.strictEqual(maxConcurrent, DEFAULT_MAX_CONCURRENT);
         });
         it("containerMemorySize is 2gb, use default concurrency",  async () => {
             // this is the container memory size for a lot of our workers
             const containerMemorySizeInBytes = '2147483648'; // 1gb
-            mockFs({ '/sys/fs/cgroup/memory/memory.limit_in_bytes': containerMemorySizeInBytes });
+            mockFs({ [CGROUP_V1_MEMORY_LIMIT_PATH]: containerMemorySizeInBytes });
             const maxConcurrent = await getMaxConcurrent(DEFAULT_PREFERRED_PART_SIZE);
             assert.strictEqual(maxConcurrent, DEFAULT_MAX_CONCURRENT);
         });
         it("containerMemorySize is 1024mb, use default concurrency",  async () => {
             // this is the container memory size for a lot of our workers
             const containerMemorySizeInBytes = '1073741824'; // 1gb
-            mockFs({ '/sys/fs/cgroup/memory/memory.limit_in_bytes': containerMemorySizeInBytes });
+            mockFs({ [CGROUP_V1_MEMORY_LIMIT_PATH]: containerMemorySizeInBytes });
             const maxConcurrent = await getMaxConcurrent(DEFAULT_PREFERRED_PART_SIZE);
             assert.strictEqual(maxConcurrent, DEFAULT_MAX_CONCURRENT);
         });
         it("containerMemorySize is just big enough, use default concurrency",  async () => {
             const containerMemorySizeInBytes = '10066329601'; // 1gb
-            mockFs({ '/sys/fs/cgroup/memory/memory.limit_in_bytes': containerMemorySizeInBytes });
+            mockFs({ [CGROUP_V1_MEMORY_LIMIT_PATH]: containerMemorySizeInBytes });
             const maxConcurrent = await getMaxConcurrent(DEFAULT_PREFERRED_PART_SIZE);
             assert.strictEqual(maxConcurrent, 8);
         });
         it("containerMemorySize is 1 byte too small, adjust concurrency down",  async () => {
             const containerMemorySizeInBytes = '1006632960'; // 1gb
-            mockFs({ '/sys/fs/cgroup/memory/memory.limit_in_bytes': containerMemorySizeInBytes });
+            mockFs({ [CGROUP_V1_MEMORY_LIMIT_PATH]: containerMemorySizeInBytes });
             const maxConcurrent = await getMaxConcurrent(DEFAULT_PREFERRED_PART_SIZE);
             assert.strictEqual(maxConcurrent, 7);
         });
         it("containerMemorySize is 512mb, adjust concurrency down",  async () => {
             // worker-dcx, worker-transfer, worker-zip, worker-indesign fall into this category
             const containerMemorySizeInBytes = '536870912'; // 1gb
-            mockFs({ '/sys/fs/cgroup/memory/memory.limit_in_bytes': containerMemorySizeInBytes });
+            mockFs({ [CGROUP_V1_MEMORY_LIMIT_PATH]: containerMemorySizeInBytes });
             const maxConcurrent = await getMaxConcurrent(DEFAULT_PREFERRED_PART_SIZE);
             assert.strictEqual(maxConcurrent, 4);
         });
@@ -106,7 +110,7 @@ describe('http.js', () => {
             // this is the default for IO runtime actions
             // custom workers as well as core have this amount
             const containerMemorySizeInBytes = '268435456'; // 1gb
-            mockFs({ '/sys/fs/cgroup/memory/memory.limit_in_bytes': containerMemorySizeInBytes });
+            mockFs({ [CGROUP_V1_MEMORY_LIMIT_PATH]: containerMemorySizeInBytes });
             const maxConcurrent = await getMaxConcurrent(DEFAULT_PREFERRED_PART_SIZE);
             assert.strictEqual(maxConcurrent, 2);
         });
@@ -114,9 +118,153 @@ describe('http.js', () => {
             // this is the default for IO runtime actions
             // custom workers as well as core have this amount
             const containerMemorySizeInBytes = '268435456'; // 1gb
-            mockFs({ '/sys/fs/cgroup/memory/memory.limit_in_bytes': containerMemorySizeInBytes });
+            mockFs({ [CGROUP_V1_MEMORY_LIMIT_PATH]: containerMemorySizeInBytes });
             const maxConcurrent = await getMaxConcurrent(10 * 1024 * 1024);
             assert.strictEqual(maxConcurrent, 8);
+        });
+
+        // cgroupv2 tests
+        it("should use default max concurrency when cgroupv2 file contains 'max'",  async () => {
+            mockFs({ [CGROUP_V2_MEMORY_LIMIT_PATH]: 'max' });
+            const maxConcurrent = await getMaxConcurrent(DEFAULT_PREFERRED_PART_SIZE);
+            assert.strictEqual(maxConcurrent, DEFAULT_MAX_CONCURRENT);
+        });
+        it("should use default max concurrency when cgroupv2 file contains 'max' with whitespace",  async () => {
+            mockFs({ [CGROUP_V2_MEMORY_LIMIT_PATH]: '  max  \n' });
+            const maxConcurrent = await getMaxConcurrent(DEFAULT_PREFERRED_PART_SIZE);
+            assert.strictEqual(maxConcurrent, DEFAULT_MAX_CONCURRENT);
+        });
+        it("should use default max concurrency when cgroupv2 file contains invalid content",  async () => {
+            mockFs({ [CGROUP_V2_MEMORY_LIMIT_PATH]: 'not a valid number' });
+            const maxConcurrent = await getMaxConcurrent(DEFAULT_PREFERRED_PART_SIZE);
+            assert.strictEqual(maxConcurrent, DEFAULT_MAX_CONCURRENT);
+        });
+        it("should use default max concurrency when cgroupv2 file contains 40gb",  async () => {
+            // high memory values should still be capped at DEFAULT_MAX_CONCURRENT
+            const containerMemorySizeInBytes = '41943040000'; // 40GB
+            mockFs({ [CGROUP_V2_MEMORY_LIMIT_PATH]: containerMemorySizeInBytes });
+            const maxConcurrent = await getMaxConcurrent(DEFAULT_PREFERRED_PART_SIZE);
+            assert.strictEqual(maxConcurrent, DEFAULT_MAX_CONCURRENT);
+        });
+        it("should use default max concurrency when cgroupv2 file contains 2gb",  async () => {
+            // 2gb is a typical memory size for nui workers
+            const containerMemorySizeInBytes = '2147483648'; // 2GB
+            mockFs({ [CGROUP_V2_MEMORY_LIMIT_PATH]: containerMemorySizeInBytes });
+            const maxConcurrent = await getMaxConcurrent(DEFAULT_PREFERRED_PART_SIZE);
+            assert.strictEqual(maxConcurrent, DEFAULT_MAX_CONCURRENT);
+        });
+        it("should use default max concurrency when cgroupv2 file contains 1024mb",  async () => {
+            // this is the container memory size for a lot of our workers
+            const containerMemorySizeInBytes = '1073741824'; // 1GB
+            mockFs({ [CGROUP_V2_MEMORY_LIMIT_PATH]: containerMemorySizeInBytes });
+            const maxConcurrent = await getMaxConcurrent(DEFAULT_PREFERRED_PART_SIZE);
+            assert.strictEqual(maxConcurrent, DEFAULT_MAX_CONCURRENT);
+        });
+        it("should use default max concurrency when cgroupv2 file contains ~9.4gb (threshold for max concurrency)",  async () => {
+            const containerMemorySizeInBytes = '10066329601'; // ~9.4GB
+            mockFs({ [CGROUP_V2_MEMORY_LIMIT_PATH]: containerMemorySizeInBytes });
+            const maxConcurrent = await getMaxConcurrent(DEFAULT_PREFERRED_PART_SIZE);
+            assert.strictEqual(maxConcurrent, 8);
+        });
+        it("should adjust concurrency down when cgroupv2 file contains ~960mb (low memory)",  async () => {
+            const containerMemorySizeInBytes = '1006632960'; // ~960MB
+            mockFs({ [CGROUP_V2_MEMORY_LIMIT_PATH]: containerMemorySizeInBytes });
+            const maxConcurrent = await getMaxConcurrent(DEFAULT_PREFERRED_PART_SIZE);
+            assert.strictEqual(maxConcurrent, 7);
+        });
+        it("should adjust concurrency down when cgroupv2 file contains 512mb",  async () => {
+            // worker-dcx, worker-transfer, worker-zip, worker-indesign fall into this category
+            const containerMemorySizeInBytes = '536870912'; // 512MB
+            mockFs({ [CGROUP_V2_MEMORY_LIMIT_PATH]: containerMemorySizeInBytes });
+            const maxConcurrent = await getMaxConcurrent(DEFAULT_PREFERRED_PART_SIZE);
+            assert.strictEqual(maxConcurrent, 4);
+        });
+        it("should adjust concurrency down when cgroupv2 file contains 256mb",  async () => {
+            // this is the default for IO runtime actions and custom workers
+            const containerMemorySizeInBytes = '268435456'; // 256MB
+            mockFs({ [CGROUP_V2_MEMORY_LIMIT_PATH]: containerMemorySizeInBytes });
+            const maxConcurrent = await getMaxConcurrent(DEFAULT_PREFERRED_PART_SIZE);
+            assert.strictEqual(maxConcurrent, 2);
+        });
+        it("should use default max concurrency when cgroupv2 file contains 256mb but large preferred part size (10mb) is used",  async () => {
+            // check that preferred part size overrides memory size
+            const containerMemorySizeInBytes = '268435456'; // 256MB
+            mockFs({ [CGROUP_V2_MEMORY_LIMIT_PATH]: containerMemorySizeInBytes });
+            const maxConcurrent = await getMaxConcurrent(10 * 1024 * 1024);
+            assert.strictEqual(maxConcurrent, 8);
+        });
+
+        // Fallback behavior tests (cgroupv2 -> cgroupv1)
+        it("should fall back to cgroupv1 successfully when cgroupv2 file is missing",  async () => {
+            const containerMemorySizeInBytes = '536870912'; // 512MB
+            mockFs({ [CGROUP_V1_MEMORY_LIMIT_PATH]: containerMemorySizeInBytes });
+            const maxConcurrent = await getMaxConcurrent(DEFAULT_PREFERRED_PART_SIZE);
+            assert.strictEqual(maxConcurrent, 4);
+        });
+        it("should use default max concurrency when both cgroupv2 and cgroupv1 files are missing",  async () => {
+            mockFs({ });
+            const maxConcurrent = await getMaxConcurrent(DEFAULT_PREFERRED_PART_SIZE);
+            assert.strictEqual(maxConcurrent, DEFAULT_MAX_CONCURRENT);
+        });
+        it("should use cgroupv2 file and ignore cgroupv1 when both files exist",  async () => {
+            const cgroupv2MemorySize = '268435456'; // 256MB
+            const cgroupv1MemorySize = '536870912'; // 512MB (should be ignored)
+            mockFs({ 
+                [CGROUP_V2_MEMORY_LIMIT_PATH]: cgroupv2MemorySize,
+                [CGROUP_V1_MEMORY_LIMIT_PATH]: cgroupv1MemorySize
+            });
+            const maxConcurrent = await getMaxConcurrent(DEFAULT_PREFERRED_PART_SIZE);
+            // Computed from cgroupv2 value (256MB -> concurrency 2)
+            assert.strictEqual(maxConcurrent, 2);
+        });
+
+        it("should fall back to cgroupv1 and log fallback message when cgroupv2 file is missing", async () => {
+            const containerMemorySizeInBytes = '536870912'; // 512MB
+            
+            // Capture console logs to verify fallback message
+            const originalLog = console.log;
+            const logMessages = [];
+            console.log = (...args) => logMessages.push(args.join(' '));
+            
+            // Mock filesystem with cgroupv1 present but cgroupv2 missing
+            mockFs({ 
+                [CGROUP_V1_MEMORY_LIMIT_PATH]: containerMemorySizeInBytes
+                // Note: cgroupv2 file is intentionally missing
+            });
+            
+            const maxConcurrent = await getMaxConcurrent(DEFAULT_PREFERRED_PART_SIZE);
+            
+            // Restore console.log
+            console.log = originalLog;
+            
+            // Verify it used cgroupv1 value (512MB -> concurrency 4)
+            assert.strictEqual(maxConcurrent, 4);
+            
+            // Verify fallback message was logged
+            const fallbackLog = logMessages.find(msg => msg.includes('cgroupv2 failed') && msg.includes('falling back to cgroupv1'));
+            assert.ok(fallbackLog, 'Should log fallback message when cgroupv2 fails');
+        });
+
+        it("should set concurrency to default max when cgroupv2 'max' is set", async () => {
+            // Mock filesystem with cgroupv2 containing 'max'
+            mockFs({
+                [CGROUP_V2_MEMORY_LIMIT_PATH]: 'max'
+            });
+            
+            const maxConcurrent = await getMaxConcurrent(DEFAULT_PREFERRED_PART_SIZE);
+            assert.strictEqual(maxConcurrent, DEFAULT_MAX_CONCURRENT);
+        });
+
+        it("should set integer value appropriately when cgroupv2 contains numeric memory limit", async () => {
+            const containerMemorySizeInBytes = '536870912'; // 512MB
+            
+            // Mock filesystem with cgroupv2 containing numeric value
+            mockFs({
+                [CGROUP_V2_MEMORY_LIMIT_PATH]: containerMemorySizeInBytes
+            });
+            
+            const maxConcurrent = await getMaxConcurrent(DEFAULT_PREFERRED_PART_SIZE);
+            assert.strictEqual(maxConcurrent, 4); // 512MB should give concurrency 4
         });
     });
 
@@ -326,7 +474,7 @@ describe('http.js', () => {
 
             mockFs({ 
                 './storeFiles/jpg': {},
-                '/sys/fs/cgroup/memory/memory.limit_in_bytes': containerMemorySizeInBytes
+                [CGROUP_V1_MEMORY_LIMIT_PATH]: containerMemorySizeInBytes
             });
 
             await download( source, file);
@@ -360,7 +508,43 @@ describe('http.js', () => {
             const containerMemorySizeInBytes = '536870912'; // 512mb
             mockFs({
                 './storeFiles/jpg': {},
-                '/sys/fs/cgroup/memory/memory.limit_in_bytes': containerMemorySizeInBytes
+                [CGROUP_V1_MEMORY_LIMIT_PATH]: containerMemorySizeInBytes
+            });
+
+            await download( source, file);
+            assert.ok(fs.existsSync(file));
+        });
+        
+        it("should download jpg file with default preferred part size and concurrency - cgroupv2 (mocked httptransfer)", async () => {
+            // mockFs messes with proxyquire and rewire loading files
+            // must restore mockFs before using these libraries
+            mockFs.restore();
+
+            // source.type
+            const source = {
+                url: "https://example.com/fakeEarth.jpg",
+                name: "fakeEarth.jpg",
+                size: 11,
+                type: 'image/jpeg'
+            };
+            const file = './storeFiles/jpg/fakeEarth.jpg';
+            const { download } = proxyquire('../../lib/storage/http.js', {
+                '@adobe/httptransfer':  {
+                    downloadFileConcurrently: async function(url, filepath, options) {
+                        assert.strictEqual(url, source.url);
+                        assert.strictEqual(filepath, './storeFiles/jpg/fakeEarth.jpg');
+                        assert.strictEqual(options.maxConcurrent, DEFAULT_MAX_CONCURRENT);
+                        assert.strictEqual(options.preferredPartSize, DEFAULT_PREFERRED_PART_SIZE);
+                        fs.writeFileSync(file, 'hello world');
+                    }
+                }
+            });
+
+            const containerMemorySizeInBytes = '1073741824'; // 1GB
+
+            mockFs({ 
+                './storeFiles/jpg': {},
+                [CGROUP_V2_MEMORY_LIMIT_PATH]: containerMemorySizeInBytes
             });
 
             await download( source, file);
@@ -554,7 +738,7 @@ describe('http.js', () => {
                 './storeFiles/jpg': {
                     "fakeEarth.jpg": "hello world!"
                 },
-                '/sys/fs/cgroup/memory/memory.limit_in_bytes': containerMemorySizeInBytes
+                [CGROUP_V1_MEMORY_LIMIT_PATH]: containerMemorySizeInBytes
             });
 
             assert.ok(fs.existsSync(file));
@@ -590,7 +774,44 @@ describe('http.js', () => {
                 './storeFiles/jpg': {
                     "fakeEarth.jpg": "hello world!"
                 },
-                '/sys/fs/cgroup/memory/memory.limit_in_bytes': containerMemorySizeInBytes
+                [CGROUP_V1_MEMORY_LIMIT_PATH]: containerMemorySizeInBytes
+            });
+
+            assert.ok(fs.existsSync(file));
+            await upload(rendition);
+        });
+        
+        it("should upload jpg file with default preferred part size and concurrency - cgroupv2 (mocked httptransfer)", async () => {
+            // mockFs messes with proxyquire and rewire loading files
+            // must restore mockFs before using these libraries
+            mockFs.restore();
+            const file = "./storeFiles/jpg/fakeEarth.jpg";
+            const rendition = {
+                path: file,
+                target: "https://example.com/fakeEarth.jpg",
+                name: 'fakeEarth.jpg',
+                size: () => 1,
+                contentType: async () => "image/jpeg"
+            };
+            const { upload } = proxyquire('../../lib/storage/http.js', {
+                '@adobe/httptransfer':  {
+                    uploadFileConcurrently: async function(filepath, target, options) {
+                        assert.strictEqual(filepath, file);
+                        assert.strictEqual(target, "https://example.com/fakeEarth.jpg");
+                        assert.strictEqual(options.maxConcurrent, DEFAULT_MAX_CONCURRENT);
+                        assert.strictEqual(options.preferredPartSize, DEFAULT_PREFERRED_PART_SIZE);
+                        assert.ok(fs.existsSync(filepath));
+                    }
+                }
+            });
+
+            const containerMemorySizeInBytes = '1073741824'; // 1GB
+
+            mockFs({ 
+                './storeFiles/jpg': {
+                    "fakeEarth.jpg": "hello world!"
+                },
+                [CGROUP_V2_MEMORY_LIMIT_PATH]: containerMemorySizeInBytes
             });
 
             assert.ok(fs.existsSync(file));
