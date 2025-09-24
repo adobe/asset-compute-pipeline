@@ -447,6 +447,85 @@ describe("Pipeline Engine tests", function () {
         assert.ok(userDataVerified, "userData absence verification was not executed");
     });
 
+    it("Passes IMS credentials correctly to transformer", async function () {
+        const params = {
+            auth: {
+                apiKey: "test-key",
+                token: "test-token"
+            },
+            imsClientId: "test-ims-client-id",
+            imsClientSecret: "test-ims-client-secret",
+            imsCode: "test-ims-code",
+            requestId: "test-request-id"
+        };
+
+        const pipeline = new Engine(params);
+
+        let credentialsVerified = false;
+        class TestTransformer extends Transformer {
+            async compute(input) {
+                // verify auth params
+                assert.strictEqual(input.auth.apiKey, "test-key");
+                assert.strictEqual(input.auth.token, "test-token");
+                
+                // verify IMS credentials
+                assert.strictEqual(input.auth.ims.imsClientId, "test-ims-client-id");
+                assert.strictEqual(input.auth.ims.imsClientSecret, "test-ims-client-secret");
+                assert.strictEqual(input.auth.ims.imsCode, "test-ims-code");
+
+                // verify requestId
+                assert.strictEqual(input.requestId, "test-request-id");
+
+                credentialsVerified = true;
+            }
+        }
+        
+        pipeline.registerTransformer(new TestTransformer("test"));
+
+        const plan = new Plan();
+        plan.add("test", DEFAULT_ATTRIBUTES);
+
+        await pipeline.run(plan);
+        assert.ok(credentialsVerified, "IMS credentials verification was not executed");
+    });
+
+    it("Doesn't set IMS object when no IMS parameters are provided", async function () {
+        const params = {
+            auth: {
+                apiKey: "test-key",
+                token: "test-token"
+            }
+            // No IMS parameters
+        };
+
+        const pipeline = new Engine(params);
+
+        let credentialsVerified = false;
+        class TestTransformer extends Transformer {
+            async compute(input) {
+                // verify auth params
+                assert.strictEqual(input.auth.apiKey, "test-key");
+                assert.strictEqual(input.auth.token, "test-token");
+                
+                // IMS object should not exist
+                assert.strictEqual(input.auth.ims, undefined);
+                
+                // requestId should not exist
+                assert.strictEqual(input.requestId, undefined);
+                
+                credentialsVerified = true;
+            }
+        }
+        
+        pipeline.registerTransformer(new TestTransformer("test"));
+
+        const plan = new Plan();
+        plan.add("test", DEFAULT_ATTRIBUTES);
+
+        await pipeline.run(plan);
+        assert.ok(credentialsVerified, "Auth parameters verification was not executed");
+    });
+
     it("Sets firefall auth when auth is not provided", async function () {
         const params = {
             // No auth object
