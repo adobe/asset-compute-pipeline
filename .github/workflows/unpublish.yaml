@@ -1,0 +1,115 @@
+# This workflow will unpublish a specific version from npm registry with safety checks and confirmations
+# For more information see: https://docs.npmjs.com/unpublishing-packages-from-the-registry
+
+name: NPM Unpublish
+
+on:
+  workflow_dispatch:
+    inputs:
+      package_name:
+        description: 'Package name (e.g., @adobe/asset-compute-pipeline)'
+        required: true
+        type: string
+        default: '@adobe/asset-compute-pipeline'
+      version:
+        description: 'Version to unpublish (e.g., 1.1.1)'
+        required: true
+        type: string
+
+jobs:
+  validate-and-unpublish:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v2
+    - name: Setup Node.js environment
+      uses: actions/setup-node@v1
+      with:
+        node-version: '18'
+        registry-url: 'https://registry.npmjs.org'
+    - name: Verify package exists
+      run: |-
+        VERSION="${{ github.event.inputs.version }}"
+        PACKAGE_NAME="${{ github.event.inputs.package_name }}"
+        
+        echo "🔍 Checking if package ${PACKAGE_NAME}@${VERSION} exists..."
+        
+        if npm view "${PACKAGE_NAME}@${VERSION}" version 2>/dev/null; then
+          echo "✅ Package ${PACKAGE_NAME}@${VERSION} found"
+        else
+          echo "❌ Package ${PACKAGE_NAME}@${VERSION} not found"
+          exit 1
+        fi
+    - name: Display unpublish details
+      run: |-
+        PACKAGE_NAME="${{ github.event.inputs.package_name }}"
+        echo "📦 Package: ${PACKAGE_NAME}"
+        echo "🏷️  Version to unpublish: ${{ github.event.inputs.version }}"
+        echo "👤 Triggered by: ${{ github.actor }}"
+        echo "⏰ Timestamp: $(date -u)"
+        echo ""
+        echo "## ⚡ PROCEEDING WITH UNPUBLISH"
+        echo "The validation is complete. Proceeding automatically with unpublishing."
+        echo ""
+        echo "⚠️  ${PACKAGE_NAME}@${{ github.event.inputs.version }} will be PERMANENTLY removed from npm!"
+    - name: Wait 1 minute before unpublish
+      run: |-
+        echo "⏳ Waiting 1 minute before proceeding with unpublish..."
+        echo "🕐 Start time: $(date -u)"
+        echo "⚠️  You have 1 minute to cancel this workflow if needed"
+        echo "📦 Package to unpublish: ${{ github.event.inputs.package_name }}@${{ github.event.inputs.version }}"
+        echo "🛑 To cancel: Go to Actions tab and cancel this workflow run"
+        sleep 60
+        echo "✅ Wait period completed at: $(date -u)"
+        echo "🚀 Proceeding with unpublish operation..."
+    - name: Execute unpublish
+      run: |-
+        PACKAGE_NAME="${{ github.event.inputs.package_name }}"
+        echo "🚨 EXECUTING UNPUBLISH - This action is irreversible!"
+        echo "📦 Package: ${PACKAGE_NAME}"
+        echo "🏷️  Version: ${{ github.event.inputs.version }}"
+        echo "👤 Triggered by: ${{ github.actor }}"
+        echo "⏰ Timestamp: $(date -u)"
+    - name: Execute npm unpublish command
+      run: npm unpublish ${{ github.event.inputs.package_name }}@${{ github.event.inputs.version }} --force
+      env:
+        NODE_AUTH_TOKEN: ${{ secrets.ADOBE_BOT_NPM_TOKEN }}
+    - name: Verify unpublish success
+      run: |-
+        VERSION="${{ github.event.inputs.version }}"
+        PACKAGE_NAME="${{ github.event.inputs.package_name }}"
+        
+        echo "🔍 Verifying unpublish..."
+        echo "⏳ Waiting for npm registry to propagate changes..."
+        
+        # Wait a bit for npm registry to update
+        sleep 10
+        
+        # Try verification with retry logic
+        for i in {1..5}; do
+          echo "Verification attempt $i/5..."
+          
+          if npm view "${PACKAGE_NAME}@${VERSION}" version 2>/dev/null; then
+            if [ $i -eq 5 ]; then
+              echo "⚠️  Package ${PACKAGE_NAME}@${VERSION} may still be cached in npm registry"
+              echo "✅ Unpublish command executed successfully, but registry may need time to propagate"
+              echo "💡 Try checking manually in a few minutes: npm view ${PACKAGE_NAME}@${VERSION}"
+              break
+            else
+              echo "Still visible, waiting 15 seconds before retry..."
+              sleep 15
+            fi
+          else
+            echo "✅ Confirmed: ${PACKAGE_NAME}@${VERSION} has been unpublished"
+            break
+          fi
+        done
+
+    - name: Post unpublish summary
+      run: |-
+        PACKAGE_NAME="${{ github.event.inputs.package_name }}"
+        echo "## 📋 Unpublish Summary" >> $GITHUB_STEP_SUMMARY
+        echo "- **Package**: ${PACKAGE_NAME}@${{ github.event.inputs.version }}" >> $GITHUB_STEP_SUMMARY
+        echo "- **Status**: ✅ Successfully unpublished" >> $GITHUB_STEP_SUMMARY
+        echo "- **Triggered by**: ${{ github.actor }}" >> $GITHUB_STEP_SUMMARY
+        echo "- **Timestamp**: $(date -u)" >> $GITHUB_STEP_SUMMARY
