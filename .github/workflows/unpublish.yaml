@@ -106,7 +106,7 @@ jobs:
         
         echo "✅ Successfully set ${PACKAGE_NAME}@${NEW_LATEST} as latest"
       env:
-        NPM_TOKEN: ${{ secrets.ADOBE_BOT_NPM_TOKEN }}
+        NODE_AUTH_TOKEN: ${{ secrets.ADOBE_BOT_NPM_TOKEN }}
     - name: Verify latest tag update
       run: |-
         PACKAGE_NAME="${{ github.event.inputs.package_name }}"
@@ -141,7 +141,7 @@ jobs:
         echo "✅ Latest tag already updated to: ${{ github.event.inputs.new_latest_version }}"
     - run: npm unpublish ${{ github.event.inputs.package_name }}@${{ github.event.inputs.version }} --force
       env:
-        NPM_TOKEN: ${{ secrets.ADOBE_BOT_NPM_TOKEN }}
+        NODE_AUTH_TOKEN: ${{ secrets.ADOBE_BOT_NPM_TOKEN }}
     - name: Verify unpublish success
       run: |-
         VERSION="${{ github.event.inputs.version }}"
