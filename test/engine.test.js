@@ -363,6 +363,62 @@ describe("Pipeline Engine tests", function () {
         assert.ok(authVerified, "Auth parameters verification was not executed");
     });
 
+    it("Passes assetComputeEnabledFeatureToggle to transformer context", async function () {
+        const params = {
+            auth: {
+                apiKey: "test-key"
+            },
+            assetComputeEnabledFeatureToggle: "gpt-4-turbo"
+        };
+
+        const pipeline = new Engine(params);
+
+        let featureToggleVerified = false;
+        class TestTransformer extends Transformer {
+            async compute(input) {
+                // verify featureToggle is passed through
+                assert.strictEqual(input.featureToggle, "gpt-4-turbo");
+                featureToggleVerified = true;
+            }
+        }
+        
+        pipeline.registerTransformer(new TestTransformer("test"));
+
+        const plan = new Plan();
+        plan.add("test", DEFAULT_ATTRIBUTES);
+
+        await pipeline.run(plan);
+        assert.ok(featureToggleVerified, "Feature toggle verification was not executed");
+    });
+
+    it("Doesn't set featureToggle when not provided", async function () {
+        const params = {
+            auth: {
+                apiKey: "test-key"
+            }
+            // No assetComputeEnabledFeatureToggle
+        };
+
+        const pipeline = new Engine(params);
+
+        let featureToggleVerified = false;
+        class TestTransformer extends Transformer {
+            async compute(input) {
+                // verify featureToggle property doesn't exist when not provided
+                assert.strictEqual(Object.prototype.hasOwnProperty.call(input, 'featureToggle'), false);
+                featureToggleVerified = true;
+            }
+        }
+        
+        pipeline.registerTransformer(new TestTransformer("test"));
+
+        const plan = new Plan();
+        plan.add("test", DEFAULT_ATTRIBUTES);
+
+        await pipeline.run(plan);
+        assert.ok(featureToggleVerified, "Feature toggle verification was not executed");
+    });
+
     it("Filters userData to only include allowed fields", async function () {
         const params = {
             auth: {
