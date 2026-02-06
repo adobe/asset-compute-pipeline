@@ -63,7 +63,7 @@
     "mime-types": "^2.1.35",
     "valid-data-url": "^4.0.1"
   },
-  "overrides": {
+  "resolutions": {
     "@typespec/ts-http-runtime": "0.3.1"
   }
 }
