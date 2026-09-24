@@ -512,6 +512,9 @@ describe("Pipeline Engine tests", function () {
             imsClientId: "test-ims-client-id",
             imsClientSecret: "test-ims-client-secret",
             imsCode: "test-ims-code",
+            imsClientIdStage: "test-ims-client-id-stage",
+            imsClientSecretStage: "test-ims-client-secret-stage",
+            imsCodeStage: "test-ims-code-stage",
             requestId: "test-request-id"
         };
 
@@ -523,11 +526,16 @@ describe("Pipeline Engine tests", function () {
                 // verify auth params
                 assert.strictEqual(input.auth.apiKey, "test-key");
                 assert.strictEqual(input.auth.token, "test-token");
-                
+
                 // verify IMS credentials
                 assert.strictEqual(input.auth.ims.imsClientId, "test-ims-client-id");
                 assert.strictEqual(input.auth.ims.imsClientSecret, "test-ims-client-secret");
                 assert.strictEqual(input.auth.ims.imsCode, "test-ims-code");
+
+                // verify IMS stage credentials
+                assert.strictEqual(input.auth.ims.imsClientIdStage, "test-ims-client-id-stage");
+                assert.strictEqual(input.auth.ims.imsClientSecretStage, "test-ims-client-secret-stage");
+                assert.strictEqual(input.auth.ims.imsCodeStage, "test-ims-code-stage");
 
                 // verify requestId
                 assert.strictEqual(input.requestId, "test-request-id");
@@ -535,7 +543,7 @@ describe("Pipeline Engine tests", function () {
                 credentialsVerified = true;
             }
         }
-        
+
         pipeline.registerTransformer(new TestTransformer("test"));
 
         const plan = new Plan();
@@ -543,6 +551,46 @@ describe("Pipeline Engine tests", function () {
 
         await pipeline.run(plan);
         assert.ok(credentialsVerified, "IMS credentials verification was not executed");
+    });
+
+    it("Sets IMS object when only IMS stage parameters are provided", async function () {
+        const params = {
+            auth: {
+                apiKey: "test-key",
+                token: "test-token"
+            },
+            // No production IMS parameters, only stage
+            imsClientIdStage: "test-ims-client-id-stage",
+            imsClientSecretStage: "test-ims-client-secret-stage",
+            imsCodeStage: "test-ims-code-stage"
+        };
+
+        const pipeline = new Engine(params);
+
+        let credentialsVerified = false;
+        class TestTransformer extends Transformer {
+            async compute(input) {
+                // verify production IMS credentials are undefined
+                assert.strictEqual(input.auth.ims.imsClientId, undefined);
+                assert.strictEqual(input.auth.ims.imsClientSecret, undefined);
+                assert.strictEqual(input.auth.ims.imsCode, undefined);
+
+                // verify IMS stage credentials are set
+                assert.strictEqual(input.auth.ims.imsClientIdStage, "test-ims-client-id-stage");
+                assert.strictEqual(input.auth.ims.imsClientSecretStage, "test-ims-client-secret-stage");
+                assert.strictEqual(input.auth.ims.imsCodeStage, "test-ims-code-stage");
+
+                credentialsVerified = true;
+            }
+        }
+
+        pipeline.registerTransformer(new TestTransformer("test"));
+
+        const plan = new Plan();
+        plan.add("test", DEFAULT_ATTRIBUTES);
+
+        await pipeline.run(plan);
+        assert.ok(credentialsVerified, "IMS stage credentials verification was not executed");
     });
 
     it("Doesn't set IMS object when no IMS parameters are provided", async function () {
